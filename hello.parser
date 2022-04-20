@@ -1,0 +1,8 @@
+(program
+  [ (func
+      "main" (itype)
+      []
+      [ (return
+          (iconst 0))
+      ])
+  ])
