@@ -93,6 +93,8 @@ struct RiscvInstr : public Instr {
         LI,
         SW,
         MOVE,
+        NOT,
+        SEQZ
         // You could add other instructions/pseudo instructions here
     } op_code; // operation code
 
