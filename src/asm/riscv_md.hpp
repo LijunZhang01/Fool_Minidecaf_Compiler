@@ -84,17 +84,26 @@ struct RiscvInstr : public Instr {
         // assembler directives
         COMMENT,
         // instructions/pseudo instructions
+
+        //step2
         ADD,
+        SUB,
+        MUL,
+        DIV,
+        MOD,
+        //
+
         NEG,
+        NOT,
+        SEQZ,
+        //
         J,
         BEQZ,
         RET,
         LW,
         LI,
         SW,
-        MOVE,
-        NOT,
-        SEQZ
+        MOVE
         // You could add other instructions/pseudo instructions here
     } op_code; // operation code
 
