@@ -95,6 +95,105 @@ static void expect(ast::Expr *e, Type *t) {
  */
 void SemPass2::visit(ast::IntConst *e) { e->ATTR(type) = BaseType::Int; }
 
+
+/* SemPass2 an ast::LesExpr node.
+ */
+void SemPass2::visit(ast::LesExpr *e) {
+    e->e1->accept(this);
+    expect(e->e1, BaseType::Int);
+
+    e->e2->accept(this);
+    expect(e->e2, BaseType::Int);
+
+    e->ATTR(type) = BaseType::Int;
+}
+
+/* SemPass2 an ast::GrtExpr node.
+ */
+void SemPass2::visit(ast::GrtExpr *e) {
+    e->e1->accept(this);
+    expect(e->e1, BaseType::Int);
+
+    e->e2->accept(this);
+    expect(e->e2, BaseType::Int);
+
+    e->ATTR(type) = BaseType::Int;
+}
+
+/* SemPass2 an ast::LeqExpr node.
+ */
+void SemPass2::visit(ast::LeqExpr *e) {
+    e->e1->accept(this);
+    expect(e->e1, BaseType::Int);
+
+    e->e2->accept(this);
+    expect(e->e2, BaseType::Int);
+
+    e->ATTR(type) = BaseType::Int;
+}
+
+/* SemPass2 an ast::GeqExpr node.
+ */
+void SemPass2::visit(ast::GeqExpr *e) {
+    e->e1->accept(this);
+    expect(e->e1, BaseType::Int);
+
+    e->e2->accept(this);
+    expect(e->e2, BaseType::Int);
+
+    e->ATTR(type) = BaseType::Int;
+}
+
+
+/* SemPass2 an ast::EquExpr node.
+ */
+void SemPass2::visit(ast::EquExpr *e) {
+    e->e1->accept(this);
+    expect(e->e1, BaseType::Int);
+
+    e->e2->accept(this);
+    expect(e->e2, BaseType::Int);
+
+    e->ATTR(type) = BaseType::Int;
+}
+
+/* SemPass2 an ast::NeqExpr node.
+ */
+void SemPass2::visit(ast::NeqExpr *e) {
+    e->e1->accept(this);
+    expect(e->e1, BaseType::Int);
+
+    e->e2->accept(this);
+    expect(e->e2, BaseType::Int);
+
+    e->ATTR(type) = BaseType::Int;
+}
+
+/* SemPass2 an ast::AndExpr node.
+ */
+void SemPass2::visit(ast::AndExpr *e) {
+    e->e1->accept(this);
+    expect(e->e1, BaseType::Int);
+
+    e->e2->accept(this);
+    expect(e->e2, BaseType::Int);
+
+    e->ATTR(type) = BaseType::Int;
+}
+
+/* SemPass2 an ast::OrExpr node.
+ */
+void SemPass2::visit(ast::OrExpr *e) {
+    e->e1->accept(this);
+    expect(e->e1, BaseType::Int);
+
+    e->e2->accept(this);
+    expect(e->e2, BaseType::Int);
+
+    e->ATTR(type) = BaseType::Int;
+}
+
+
 /*step2 
  *Visits an ast::AddExpr node.
  *

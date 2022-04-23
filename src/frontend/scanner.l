@@ -97,6 +97,15 @@ IDENTIFIER    ([A-Za-z][_0-9A-Za-z]*)
 "while"       { return yy::parser::make_WHILE  (loc);       }
 "break"       { return yy::parser::make_BREAK (loc);       }
 
+"<="       { return yy::parser::make_LEQ (loc);       }
+">="       { return yy::parser::make_GEQ (loc);       }
+"<"       { return yy::parser::make_LT (loc);       }
+">"       { return yy::parser::make_GT (loc);       }
+"=="       { return yy::parser::make_EQU (loc);       }
+"!="       { return yy::parser::make_NEQ (loc);       }
+"&&"       { return yy::parser::make_AND (loc);       }
+"||"       { return yy::parser::make_OR (loc);       }
+
 {INTEGER}     {return make_ICONST(yytext, loc);}
 
 {IDENTIFIER}  {return yy::parser::make_IDENTIFIER (yytext, loc); }

@@ -197,6 +197,22 @@ Expr        : ICONST
                 { $$ = new ast::BitNotExpr($2, POS(@1)); }
             | BNOT Expr  %prec BNOT
                 { $$ = new ast::NotExpr($2, POS(@1)); }
+            | Expr LEQ Expr %prec LEQ
+                { $$ = new ast::LeqExpr($1,$3, POS(@2)); }
+            | Expr GEQ Expr %prec GEQ
+                { $$ = new ast::GeqExpr($1,$3, POS(@2)); }
+            | Expr LT Expr %prec LT
+                { $$ = new ast::LesExpr($1,$3, POS(@2)); }
+            | Expr GT Expr %prec GT
+                { $$ = new ast::GrtExpr($1,$3, POS(@2)); }
+            | Expr EQUExpr %prec EQU
+                { $$ = new ast::EquExpr($1,$3, POS(@2)); }
+            | Expr NEQ Expr %prec NEQ
+                { $$ = new ast::NeqExpr($1,$3, POS(@2)); }
+            | Expr AND Expr %prec AND
+                { $$ = new ast::AndExpr($1,$3, POS(@2)); }
+            | Expr OR Expr %prec OR
+                { $$ = new ast::OrExpr($1,$3, POS(@2)); }
             ;
 
 %%
