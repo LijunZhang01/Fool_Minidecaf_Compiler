@@ -39,6 +39,16 @@ class SemPass2 : public ast::Visitor {
     virtual void visit(ast::DivExpr *);
     virtual void visit(ast::ModExpr *);
 
+    //完成step3
+    virtual void visit(ast::LesExpr *);
+    virtual void visit(ast::GrtExpr *);
+    virtual void visit(ast::LeqExpr *);
+    virtual void visit(ast::GeqExpr *);
+    virtual void visit(ast::EquExpr *);
+    virtual void visit(ast::NeqExpr *);
+    virtual void visit(ast::AndExpr *);
+    virtual void visit(ast::OrExpr *);
+
     virtual void visit(ast::IntConst *);
     virtual void visit(ast::NegExpr *);
     //增加NotExpr,BitNotExpr;

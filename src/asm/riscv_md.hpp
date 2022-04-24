@@ -91,19 +91,32 @@ struct RiscvInstr : public Instr {
         MUL,
         DIV,
         MOD,
-        //
-
+        //STEP2
         NEG,
         NOT,
         SEQZ,
-        //
+        //STEP3
         J,
         BEQZ,
         RET,
         LW,
         LI,
         SW,
-        MOVE
+        MOVE,
+        //STEP4
+        LEQ,
+        GEQ,
+        LES,
+        GTR,
+        EQU,
+        NEQ,
+        LAND,
+        LOR,
+        XORI,
+        XOR,
+        SNEZ,
+        AND,
+        OR
         // You could add other instructions/pseudo instructions here
     } op_code; // operation code
 

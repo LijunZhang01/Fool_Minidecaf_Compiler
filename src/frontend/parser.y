@@ -205,7 +205,7 @@ Expr        : ICONST
                 { $$ = new ast::LesExpr($1,$3, POS(@2)); }
             | Expr GT Expr %prec GT
                 { $$ = new ast::GrtExpr($1,$3, POS(@2)); }
-            | Expr EQUExpr %prec EQU
+            | Expr EQU Expr %prec EQU
                 { $$ = new ast::EquExpr($1,$3, POS(@2)); }
             | Expr NEQ Expr %prec NEQ
                 { $$ = new ast::NeqExpr($1,$3, POS(@2)); }
