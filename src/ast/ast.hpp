@@ -66,6 +66,8 @@ class ASTNode {
         VAR_REF,
         WHILE_STMT,
         FOD,
+        VArDecl_1,
+        VArDecl_2,
     } NodeType;
 
   protected:
@@ -178,10 +180,13 @@ class Program : public ASTNode {
  */
 class VarDecl : public Statement {
   public:
-    VarDecl(std::string name, Type *type, Location *l);
+    VarDecl(std::string name, Location *l);
     VarDecl(std::string name, Type *type, int dim, Location *l);
 
-    VarDecl(std::string name, Type *type, Expr *init, Location *l);
+    VarDecl(std::string name, Type *type, DouList *lian,Location *l);
+    VarDecl(std::string name, Type *type, Expr *init, DouList *lian,Location *l);
+
+    VarDecl(std::string name, Expr *init, Location *l);
     virtual void accept(Visitor *);
     virtual void dumpTo(std::ostream &);
 
@@ -189,9 +194,41 @@ class VarDecl : public Statement {
     std::string name;
     Type *type;
     Expr *init;
+    DouList *lian;
+    symb::Variable *ATTR(sym); // for semantic analysis
+};
+
+//大胆的尝试
+class VarDecl_1 : public Statement {
+  public:
+    VarDecl_1(std::string name, Type *type, DeclList  *vardecl_2 , Location *l);
+    VarDecl_1(std::string name, Type *type, int dim, Location *l);
+
+    VarDecl_1(std::string name, Type *type, Expr *init, DeclList  *vardecl_2 , Location *l);
+    virtual void accept(Visitor *);
+    virtual void dumpTo(std::ostream &);
+
+  public:
+    std::string name;
+    Type *type;
+    Expr *init;
+    DeclList *vardecl_2;
 
     symb::Variable *ATTR(sym); // for semantic analysis
 };
+
+class VarDecl_2 : public Statement {
+  public:
+    VarDecl_2(Expr *val, Location *l);
+    virtual void accept(Visitor *);
+    virtual void dumpTo(std::ostream &);
+
+  public:
+    Expr *val;
+    symb::Variable *ATTR(sym); // for semantic analysis
+};
+//尝试结束
+
 
 class FuncDefn : public ASTNode {
   public:

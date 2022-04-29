@@ -12,7 +12,7 @@
 
 using namespace mind;
 using namespace mind::ast;
-
+Type *mind::quanju=NULL;
 /* Creates a new VarDecl node.
  *
  * PARAMETERS:
@@ -20,21 +20,41 @@ using namespace mind::ast;
  *   t       - type of the variable
  *   l       - position in the source text
  */
-VarDecl::VarDecl(std::string n, Type *t, Location *l) {
+VarDecl::VarDecl(std::string n, Type *t, DouList *li,Location *l) {
 
     setBasicInfo(VAR_DECL, l);
-
     name = n;
     type = t;
+    quanju = t;
     init = NULL;
+    lian=li;
 }
 
-VarDecl::VarDecl(std::string n, Type *t, Expr *i, Location *l) {
+VarDecl::VarDecl(std::string n, Type *t, Expr *i, DouList *li,Location *l) {
     setBasicInfo(VAR_DECL, l);
 
     name = n;
     type = t;
+    quanju=t;
     init = i;
+    lian=li;
+}
+
+VarDecl::VarDecl(std::string n, Location *l) {
+
+    setBasicInfo(VAR_DECL, l);
+    name = n;
+    type = quanju;
+    init = NULL;
+    //lian=NULL;
+}
+
+VarDecl::VarDecl(std::string n, Expr *i, Location *l) {
+    setBasicInfo(VAR_DECL, l);
+    name = n;
+    type = quanju;
+    init = i;
+    //lian=NULL;
 }
 
 VarDecl::VarDecl(std::string n, Type *t, int d, Location *l) {

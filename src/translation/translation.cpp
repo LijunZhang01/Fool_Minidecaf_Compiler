@@ -96,6 +96,13 @@ void Translation::visit(ast::FuncDefn *f) {
  */
 void Translation::visit(ast::AssignExpr *s) {
     // TODO
+    s->left->accept(this);
+    s->e->accept(this);
+    //ast::VarRef *ref = (ast::VarRef *)(s->left);
+    //Temp temp = ref->ATTR(sym)->getTemp();
+    Temp temp = ((ast::VarRef *)(s->left))->ATTR(sym)->getTemp();
+    tr->genAssign(temp, s->e->ATTR(val)); 
+    s->ATTR(val) = temp;
 }
 
 /* Translating an ast::ExprStmt node.
@@ -315,6 +322,16 @@ void Translation::visit(ast::BitNotExpr *e) {
  */
 void Translation::visit(ast::LvalueExpr *e) {
     // TODO
+    e->lvalue->accept(this);
+    switch (e->lvalue->getKind()) {
+        case ast::ASTNode::VAR_REF:{
+            //ast::VarRef *ref = (ast::VarRef *)e->lvalue;
+            e->ATTR(val) = ((ast::VarRef *)e->lvalue)->ATTR(sym)->getTemp();
+            break;
+        }
+        default:
+            mind_assert(false);
+    }
 }
 
 /* Translating an ast::VarRef node.
@@ -339,6 +356,17 @@ void Translation::visit(ast::VarRef *ref) {
  */
 void Translation::visit(ast::VarDecl *decl) {
     // TODO
+    //具体步骤就是先为这个变量的左值分配一个Temp，若在变量的定义中发现他拥有赋值的操作，那就应该生成Assign语句的
+    //三元表达式
+    decl->ATTR(sym)->attachTemp(tr->getNewTempI4());
+    if(decl->init!=NULL){
+        decl->init->accept(this);
+        tr->genAssign(decl->ATTR(sym)->getTemp(),decl->init->ATTR(val));
+    }
+    for(ast::DouList::iterator it=decl->lian->begin();
+        it!=decl->lian->end();++it){
+            (*it)->accept(this);
+        }
 }
 
 /* Translates an entire AST into a Piece list.

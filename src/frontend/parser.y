@@ -90,14 +90,17 @@ void scan_end();
 %token <std::string> IDENTIFIER "identifier"
 %token<int> ICONST "iconst"
 %nterm<mind::ast::StmtList*> StmtList
-%nterm<mind::ast::VarList* > FormalList 
+%nterm<mind::ast::VarList* > FormalList DouList
 %nterm<mind::ast::Program* > Program FoDList
 %nterm<mind::ast::FuncDefn* > FuncDefn
 %nterm<mind::ast::Type*> Type
-%nterm<mind::ast::Statement*> Stmt  ReturnStmt ExprStmt IfStmt  CompStmt WhileStmt 
-%nterm<mind::ast::Expr*> Expr
+%nterm<mind::ast::Statement*> Stmt  ReturnStmt ExprStmt IfStmt  CompStmt WhileStmt DeclStmt DeclStmt1 DeclStmt2
+%nterm<mind::ast::Expr*> Expr LvalueExpr
+%nterm<mind::ast::VarRef*> VarRef
+%nterm<mind::ast::DeclList*> DeclList
 /*   SUBSECTION 2.2: associativeness & precedences */
 %nonassoc QUESTION
+%left     ASSIGN
 %left     OR
 %left     AND
 %left EQU NEQ
@@ -138,15 +141,18 @@ FuncDefn : Type IDENTIFIER LPAREN FormalList RPAREN LBRACE StmtList RBRACE {
 FormalList :  /* EMPTY */
             {$$ = new ast::VarList();} 
 
-Type        : INT
+Type        : INT 
                 { $$ = new ast::IntType(POS(@1)); }
 StmtList    : /* empty */
                 { $$ = new ast::StmtList(); }
             | StmtList Stmt
                 { $1->append($2);
                   $$ = $1; }
+            | StmtList DeclStmt
+                { $1->append($2);
+                  $$ = $1;
+                }
             ;
-
 Stmt        : ReturnStmt {$$ = $1;}|
               ExprStmt   {$$ = $1;}|
               IfStmt     {$$ = $1;}|
@@ -157,6 +163,34 @@ Stmt        : ReturnStmt {$$ = $1;}|
               SEMICOLON
                 {$$ = new ast::EmptyStmt(POS(@1));}
             ;
+
+DeclStmt    : Type IDENTIFIER DouList SEMICOLON 
+                { $$ = new ast::VarDecl($2, $1, $3,POS(@1)); }
+            | Type IDENTIFIER ASSIGN Expr DouList SEMICOLON 
+                { $$ = new ast::VarDecl($2, $1, $4, $5,POS(@1)); }
+            ;
+
+DouList     : /* EMPTY */
+                {$$ = new ast::DouList();} 
+            | COMMA IDENTIFIER DouList
+                { $3->append(new ast::VarDecl($2,POS(@1)));
+                  $$=$3;
+                }
+            | COMMA IDENTIFIER ASSIGN Expr DouList
+                { $5->append(new ast::VarDecl($2, $4,POS(@1)));
+                  $$=$5;
+                }
+            ;
+VarRef      : IDENTIFIER
+                { $$ = new ast::VarRef($1, POS(@1)); }
+            ;
+
+LvalueExpr  : VarRef
+                { $$ = new ast::LvalueExpr($1, POS(@1)); }
+            | VarRef ASSIGN Expr
+                { $$ = new ast::AssignExpr($1, $3, POS(@2)); }
+            ;
+
 CompStmt    : LBRACE StmtList RBRACE
                 {$$ = new ast::CompStmt($2,POS(@1));}
             ;
@@ -179,6 +213,8 @@ Expr        : ICONST
                 { $$ = new ast::IntConst($1, POS(@1)); }            
             | LPAREN Expr RPAREN
                 { $$ = $2; }
+            | LvalueExpr
+                { $$ = $1; }
             | Expr PLUS Expr %prec PLUS
                 { $$ = new ast::AddExpr($1, $3, POS(@2)); }
             | Expr MINUS Expr %prec MINUS

@@ -35,11 +35,11 @@ class ScopeStack {
   public:
     // Constructor
     ScopeStack();
-    // Looks up a name in the scope stack
+    // Looks up a name in the scope stack  寻找一个scope栈的名字
     symb::Symbol *lookup(std::string id, Location *loc, bool through = true);
-    // Declares a symbol in the current scope
+    // Declares a symbol in the current scope 定义一个符号在目前的scope
     void declare(symb::Symbol *s);
-    // Opens a scope
+    // Opens a scope  
     void open(Scope *s);
     // Closes the current scope
     void close(void);

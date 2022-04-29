@@ -375,6 +375,12 @@ issue_error_type:
 void SemPass2::visit(ast::VarDecl *decl) {
     if (decl->init)
         decl->init->accept(this);
+    
+        for(ast::DouList::iterator it=decl->lian->begin();
+        it!=decl->lian->end();++it){
+            (*it)->accept(this);
+        }
+    
 }
 
 /* Visits an ast::AssignStmt node.

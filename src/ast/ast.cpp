@@ -54,7 +54,9 @@ const char *ASTNode::node_name[] = {"add",
                                     "var",
                                     "varref",
                                     "while",
-                                    "FuncOrDecl"};
+                                    "FuncOrDecl",
+                                    "VarDecl_1",
+                                    "VarDecl_2"};
 
 /*  Whether to print the decorated abstract syntax tree.
  */
@@ -257,3 +259,23 @@ std::ostream &mind::operator<<(std::ostream &os, FuncOrGlobalList *l) {
 
     return os;
 }
+
+// std::ostream &mind::operator<<(std::ostream &os, DeclList *l) {
+//     os << "[";
+//     if (!l->empty()) {
+//         incIndent(os);
+//         os << " ";
+//         FuncOrGlobalList::iterator it = l->begin();
+//         os << *it;
+//         while (++it != l->end()) {
+
+//             newLine(os);
+//             os << *it;
+//         }
+//         decIndent(os);
+//         newLine(os);
+//     }
+//     os << "]";
+
+//     return os;
+// }

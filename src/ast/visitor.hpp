@@ -70,7 +70,9 @@ class Visitor {
     virtual void visit(Program *) = 0;
     virtual void visit(FuncDefn *) {}
     virtual void visit(VarDecl *) {}
-
+    // 尝试
+    virtual void visit(VarDecl_1 *) {}
+    virtual void visit(VarDecl_2 *) {}
     virtual ~Visitor() {}
 };
 } // namespace ast

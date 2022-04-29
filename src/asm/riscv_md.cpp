@@ -96,6 +96,9 @@ RiscvDesc::RiscvDesc(void) {
  * RETURNS:
  *   the offset counter for Riscv
  */
+
+
+
 OffsetCounter *RiscvDesc::getOffsetCounter(void) { return _counter; }
 
 /* Translates the given Piece list into assembly code and output.
@@ -283,6 +286,10 @@ void RiscvDesc::emitTac(Tac *t) {
     case Tac::LOR:
         emitBinaryTac(RiscvInstr::LOR, t);
         break;
+    
+    case Tac::ASSIGN:
+        emitAssignTac(RiscvInstr::ASSIGN, t);
+        break;
 
     default:
         mind_assert(false); // should not appear inside a basic block
@@ -294,6 +301,7 @@ void RiscvDesc::emitTac(Tac *t) {
  * PARAMETERS:
  *   t     - the LoadImm4 TAC
  */
+
 void RiscvDesc::emitLoadImm4Tac(Tac *t) {
     // eliminates useless assignments
     if (!t->LiveOut->contains(t->op0.var))
@@ -303,6 +311,17 @@ void RiscvDesc::emitLoadImm4Tac(Tac *t) {
     int r0 = getRegForWrite(t->op0.var, 0, 0, t->LiveOut);
     addInstr(RiscvInstr::LI, _reg[r0], NULL, NULL, t->op1.ival, EMPTY_STR,
              NULL);
+}
+
+void RiscvDesc::emitAssignTac(RiscvInstr::OpCode op, Tac *t) {
+    // eliminates useless assignments
+    if (!t->LiveOut->contains(t->op0.var))
+        return;
+
+    int r1 = getRegForRead(t->op1.var, 0, t->LiveOut);
+    int r0 = getRegForWrite(t->op0.var, r1, 0, t->LiveOut);
+
+    addInstr(op, _reg[r0], _reg[r1], NULL, 0, EMPTY_STR, NULL);
 }
 
 /* Translates a Unary TAC into Riscv instructions.
@@ -337,6 +356,7 @@ void RiscvDesc::emitBinaryTac(RiscvInstr::OpCode op, Tac *t) {
     int r1 = getRegForRead(t->op1.var, 0, liveness);
     int r2 = getRegForRead(t->op2.var, r1, liveness);
     int r0 = getRegForWrite(t->op0.var, r1, r2, liveness);
+    int r3 = getRegForWrite(t->op0.var, r1, r2,liveness);
     switch(op){
         case RiscvInstr::OpCode::LEQ:
             addInstr(RiscvInstr::OpCode::GTR, _reg[r0], _reg[r1], _reg[r2], 0, EMPTY_STR, NULL);
@@ -355,9 +375,9 @@ void RiscvDesc::emitBinaryTac(RiscvInstr::OpCode op, Tac *t) {
             addInstr(RiscvInstr::OpCode::SNEZ, _reg[r0], _reg[r0], NULL, 0, EMPTY_STR, NULL);
             break;
         case RiscvInstr::OpCode::LAND:
-            addInstr(RiscvInstr::OpCode::SNEZ, _reg[r1], _reg[r1], NULL, 0, EMPTY_STR, NULL);
-            addInstr(RiscvInstr::OpCode::SNEZ, _reg[r2], _reg[r2], NULL, 0, EMPTY_STR, NULL);
-            addInstr(RiscvInstr::OpCode::AND, _reg[r0], _reg[r1], _reg[r2], 0, EMPTY_STR, NULL);
+            addInstr(RiscvInstr::OpCode::SNEZ, _reg[r0], _reg[r1], NULL, 0, EMPTY_STR, NULL);
+            addInstr(RiscvInstr::OpCode::SNEZ, _reg[r3], _reg[r2], NULL, 0, EMPTY_STR, NULL);
+            addInstr(RiscvInstr::OpCode::AND, _reg[r0], _reg[r0], _reg[r3], 0, EMPTY_STR, NULL);
             break;
         case RiscvInstr::OpCode::LOR:
             addInstr(RiscvInstr::OpCode::OR, _reg[r0], _reg[r1], _reg[r2], 0, EMPTY_STR, NULL);
@@ -583,6 +603,10 @@ void RiscvDesc::emitInstr(RiscvInstr *i) {
 
     case RiscvInstr::OR:
         oss << "or" << i->r0->name << ", " << i->r1->name << ", " << i->r2->name;
+        break;
+    
+    case RiscvInstr::ASSIGN:
+        oss << "mv" << i->r0->name << ", " << i->r1->name;
         break;
 
     default:

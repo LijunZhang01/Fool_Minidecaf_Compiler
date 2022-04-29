@@ -30,6 +30,7 @@
 namespace mind {
 
 extern scope::ScopeStack *scopes;
+extern ast::Type *quanju;
 
 /* Output Functions */
 std::ostream &operator<<(std::ostream &, Location *);

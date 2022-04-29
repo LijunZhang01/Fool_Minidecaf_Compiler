@@ -116,7 +116,9 @@ struct RiscvInstr : public Instr {
         XOR,
         SNEZ,
         AND,
-        OR
+        OR,
+        //STEP4
+        ASSIGN
         // You could add other instructions/pseudo instructions here
     } op_code; // operation code
 
@@ -170,7 +172,8 @@ class RiscvDesc : public MachineDesc {
     void emitUnaryTac(RiscvInstr::OpCode, tac::Tac *);
     // translates a Binary TAC into assembly instructions
     void emitBinaryTac(RiscvInstr::OpCode, tac::Tac *);
-
+    //STEP4
+    void emitAssignTac(RiscvInstr::OpCode, tac::Tac *);
     // outputs an instruction
     void emit(std::string, const char *, const char *);
     // outputs a function
@@ -185,6 +188,7 @@ class RiscvDesc : public MachineDesc {
     void addInstr(RiscvInstr::OpCode, RiscvReg *, RiscvReg *, RiscvReg *, int,
                   std::string, const char *);
 
+    
 
     /*** sketch for peephole optimizer (inside a basic block) ***/
     void simplePeephole(RiscvInstr *);

@@ -171,6 +171,20 @@ void SemPass1::visit(ast::VarDecl *vdecl) {
     // 3. Declare the symbol in `scopes`
     // 4. Special processing for global variables
     // 5. Tag the symbol to `vdecl->ATTR(sym)`
+    Variable *v=new Variable(vdecl->name, t, vdecl->getLocation());
+    vdecl->ATTR(sym) = v;
+    Symbol *sym = scopes->lookup(vdecl->name, vdecl->getLocation(), 0);
+    if(sym != NULL)
+        issue(vdecl->getLocation(),new DeclConflictError(vdecl->name, sym));
+    else
+        scopes->declare(vdecl->ATTR(sym));
+    
+    
+        for(ast::DouList::iterator it=vdecl->lian->begin();
+        it!=vdecl->lian->end();++it){
+            (*it)->accept(this);
+        }
+    
 }
 
 /* Visiting an ast::IntType node.
