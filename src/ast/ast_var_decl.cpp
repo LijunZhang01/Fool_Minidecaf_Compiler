@@ -25,7 +25,7 @@ VarDecl::VarDecl(std::string n, Type *t, DouList *li,Location *l) {
     setBasicInfo(VAR_DECL, l);
     name = n;
     type = t;
-    quanju = t;
+    //quanju = t;
     init = NULL;
     lian=li;
     if(lian!=NULL){
@@ -41,7 +41,7 @@ VarDecl::VarDecl(std::string n, Type *t, Expr *i, DouList *li,Location *l) {
 
     name = n;
     type = t;
-    quanju=t;
+    //quanju=t;
     init = i;
     lian=li;
     if(lian!=NULL){
@@ -56,7 +56,8 @@ VarDecl::VarDecl(std::string n, Location *l) {
 
     setBasicInfo(VAR_DECL, l);
     name = n;
-    type = quanju;
+    //type = quanju;
+    type = NULL;
     init = NULL;
     lian=NULL;
 }
@@ -64,7 +65,8 @@ VarDecl::VarDecl(std::string n, Location *l) {
 VarDecl::VarDecl(std::string n, Expr *i, Location *l) {
     setBasicInfo(VAR_DECL, l);
     name = n;
-    type = quanju;
+    //type = quanju;
+    type = NULL;
     init = i;
     lian=NULL;
 }
