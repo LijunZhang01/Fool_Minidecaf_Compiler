@@ -363,10 +363,13 @@ void Translation::visit(ast::VarDecl *decl) {
         decl->init->accept(this);
         tr->genAssign(decl->ATTR(sym)->getTemp(),decl->init->ATTR(val));
     }
-    for(ast::DouList::iterator it=decl->lian->begin();
+    if(decl->lian!=NULL){
+        for(ast::DouList::iterator it=decl->lian->begin();
         it!=decl->lian->end();++it){
             (*it)->accept(this);
         }
+    }
+    
 }
 
 /* Translates an entire AST into a Piece list.

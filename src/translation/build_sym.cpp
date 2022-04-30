@@ -179,12 +179,12 @@ void SemPass1::visit(ast::VarDecl *vdecl) {
     else
         scopes->declare(vdecl->ATTR(sym));
     
-    
-        for(ast::DouList::iterator it=vdecl->lian->begin();
+    if(vdecl->lian!=NULL)
+    {    for(ast::DouList::iterator it=vdecl->lian->begin();
         it!=vdecl->lian->end();++it){
             (*it)->accept(this);
         }
-    
+    }
 }
 
 /* Visiting an ast::IntType node.

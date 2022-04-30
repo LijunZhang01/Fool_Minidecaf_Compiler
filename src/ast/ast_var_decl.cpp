@@ -28,6 +28,12 @@ VarDecl::VarDecl(std::string n, Type *t, DouList *li,Location *l) {
     quanju = t;
     init = NULL;
     lian=li;
+    if(lian!=NULL){
+        for(ast::DouList::iterator it=lian->begin();
+        it!=lian->end();++it){
+            (*it)->type=t;
+        }
+    }
 }
 
 VarDecl::VarDecl(std::string n, Type *t, Expr *i, DouList *li,Location *l) {
@@ -38,6 +44,12 @@ VarDecl::VarDecl(std::string n, Type *t, Expr *i, DouList *li,Location *l) {
     quanju=t;
     init = i;
     lian=li;
+    if(lian!=NULL){
+        for(ast::DouList::iterator it=lian->begin();
+        it!=lian->end();++it){
+            (*it)->type=t;
+        }
+    }
 }
 
 VarDecl::VarDecl(std::string n, Location *l) {
@@ -46,7 +58,7 @@ VarDecl::VarDecl(std::string n, Location *l) {
     name = n;
     type = quanju;
     init = NULL;
-    //lian=NULL;
+    lian=NULL;
 }
 
 VarDecl::VarDecl(std::string n, Expr *i, Location *l) {
@@ -54,7 +66,7 @@ VarDecl::VarDecl(std::string n, Expr *i, Location *l) {
     name = n;
     type = quanju;
     init = i;
-    //lian=NULL;
+    lian=NULL;
 }
 
 VarDecl::VarDecl(std::string n, Type *t, int d, Location *l) {
