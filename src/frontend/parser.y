@@ -99,8 +99,9 @@ void scan_end();
 %nterm<mind::ast::VarRef*> VarRef
 %nterm<mind::ast::DeclList*> DeclList
 /*   SUBSECTION 2.2: associativeness & precedences */
-%nonassoc QUESTION
+
 %left     ASSIGN
+%right   QUESTION
 %left     OR
 %left     AND
 %left EQU NEQ
@@ -249,6 +250,8 @@ Expr        : ICONST
                 { $$ = new ast::AndExpr($1,$3, POS(@2)); }
             | Expr OR Expr %prec OR
                 { $$ = new ast::OrExpr($1,$3, POS(@2)); }
+            | Expr QUESTION Expr COLON Expr %prec QUESTION
+                { $$ = new ast::IfExpr($1, $3, $5, POS(@1)); }
             ;
 
 %%

@@ -46,6 +46,9 @@ class Translation : public ast::Visitor {
     virtual void visit(ast::DivExpr *);
     virtual void visit(ast::ModExpr *);
 
+    //STEP6
+    virtual void visit(ast::IfExpr *);
+
     virtual void visit(ast::IntConst *);
     virtual void visit(ast::NegExpr *);
     virtual void visit(ast::LvalueExpr *);

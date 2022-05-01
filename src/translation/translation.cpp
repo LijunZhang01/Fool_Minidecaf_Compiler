@@ -115,18 +115,45 @@ void Translation::visit(ast::ExprStmt *s) { s->e->accept(this); }
  *   you don't need to test whether the false_brch is empty
  */
 void Translation::visit(ast::IfStmt *s) {
+    //看一个具体示例就会发现简单明了，easy
     Label L1 = tr->getNewLabel(); // entry of the false branch
     Label L2 = tr->getNewLabel(); // exit
     s->condition->accept(this);
+    //beqz搞到错误分支地址
     tr->genJumpOnZero(L1, s->condition->ATTR(val));
-
+    //正确分支代码
     s->true_brch->accept(this);
+    //jump跳到出口
     tr->genJump(L2); // done
-
+    //genMarkLable:标记错误分支地址
     tr->genMarkLabel(L1);
     s->false_brch->accept(this);
 
     tr->genMarkLabel(L2);
+}
+
+void Translation::visit(ast::IfExpr *s) {
+    // TODO
+    Temp temp = tr->getNewTempI4();
+    //看一个示例就会发现简单明了，easy
+    Label L1 = tr->getNewLabel(); // entry of the false branch
+    Label L2 = tr->getNewLabel(); // exit
+    s->condition->accept(this);
+    //beqz搞到错误分支地址
+    tr->genJumpOnZero(L1, s->condition->ATTR(val));
+    //正确分支代码
+    s->true_brch->accept(this);
+    //多加一步
+    tr->genAssign(temp, s->true_brch->ATTR(val));
+    //jump跳到出口
+    tr->genJump(L2); // done
+    //genMarkLable:标记错误分支地址
+    tr->genMarkLabel(L1);
+    s->false_brch->accept(this);
+    tr->genAssign(temp, s->false_brch->ATTR(val));
+    tr->genMarkLabel(L2);
+    s->ATTR(val)=temp;
+    
 }
 /* Translating an ast::WhileStmt node.
  */
@@ -136,7 +163,7 @@ void Translation::visit(ast::WhileStmt *s) {
 
     Label old_break = current_break_label;
     current_break_label = L2;
-
+    
     tr->genMarkLabel(L1);
     s->condition->accept(this);
     tr->genJumpOnZero(L2, s->condition->ATTR(val));
@@ -371,6 +398,8 @@ void Translation::visit(ast::VarDecl *decl) {
     }
     
 }
+
+
 
 /* Translates an entire AST into a Piece list.
  *
