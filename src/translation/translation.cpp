@@ -158,11 +158,14 @@ void Translation::visit(ast::IfExpr *s) {
 /* Translating an ast::WhileStmt node.
  */
 void Translation::visit(ast::WhileStmt *s) {
-    Label L1 = tr->getNewLabel();
-    Label L2 = tr->getNewLabel();
+    Label L1 = tr->getNewLabel();//当前的
+    Label L2 = tr->getNewLabel();//下一条
 
     Label old_break = current_break_label;
     current_break_label = L2;
+
+    Label old_cont = current_cont_label;
+    current_cont_label = L1;
     
     tr->genMarkLabel(L1);
     s->condition->accept(this);
@@ -173,13 +176,77 @@ void Translation::visit(ast::WhileStmt *s) {
 
     tr->genMarkLabel(L2);
 
+    //循环结束完以后old_break恢复到了原来的，这是为了解决循环的嵌套准备的
     current_break_label = old_break;
+    current_break_label = old_cont;
+}
+
+void Translation::visit(ast::DoWhileStmt *s) {
+    Label L1 = tr->getNewLabel();
+    Label L2 = tr->getNewLabel();
+
+    Label old_break = current_break_label;
+    current_break_label = L2;
+
+    Label old_cont = current_cont_label;
+    current_cont_label = L1;
+    
+    tr->genMarkLabel(L1);
+    s->loop_body->accept(this);
+    s->condition->accept(this);
+    tr->genJumpOnZero(L2, s->condition->ATTR(val));
+    tr->genJump(L1);
+    tr->genMarkLabel(L2);
+
+    current_break_label = old_break;
+    current_cont_label = old_cont;
+}
+
+void Translation::visit(ast::ForStmt *s) {
+
+    if(s->condition1!=NULL) s->condition1->accept(this);
+    if(s->decl1!=NULL) s->decl1->accept(this);
+
+    Label L1 = tr->getNewLabel();
+    Label L2 = tr->getNewLabel();
+    Label L3 = tr->getNewLabel();
+
+    Label old_break = current_break_label;
+    current_break_label = L2;
+
+    Label old_cont = current_cont_label;
+    current_cont_label = L3;
+    
+    tr->genMarkLabel(L1);
+    
+    if(s->condition2!=NULL){
+        s->condition2->accept(this);
+        tr->genJumpOnZero(L2, s->condition2->ATTR(val));
+    }
+    else{
+        Temp temp = tr->getNewTempI4();
+        tr->genAssign(temp, tr->genLoadImm4(1));
+        tr->genJumpOnZero(L2, temp);
+    }
+    
+    s->loop_body->accept(this);
+    tr->genJump(L3);
+
+    tr->genMarkLabel(L3);
+    if(s->condition3!=NULL) s->condition3->accept(this);
+    tr->genJump(L1);
+
+    tr->genMarkLabel(L2);
+    current_break_label = old_break;
+    current_cont_label = old_cont;
 }
 
 /* Translating an ast::BreakStmt node.
  */
 void Translation::visit(ast::BreakStmt *s) { tr->genJump(current_break_label); }
 
+
+void Translation::visit(ast::ContStmt *s) { tr->genJump(current_cont_label); }
 /* Translating an ast::CompStmt node.
  */
 void Translation::visit(ast::CompStmt *c) {
@@ -280,19 +347,44 @@ void Translation::visit(ast::NeqExpr *e) {
 /* Translating an ast::AndExpr node.
  */
 void Translation::visit(ast::AndExpr *e) {
+    Temp temp = tr->getNewTempI4();
+    Label L1=tr->getNewLabel();
+    Label L2=tr->getNewLabel();
     e->e1->accept(this);
+    tr->genJumpOnZero(L1,e->e1->ATTR(val));
     e->e2->accept(this);
-
-    e->ATTR(val) = tr->genLAnd(e->e1->ATTR(val), e->e2->ATTR(val));
+    tr->genAssign(temp, tr->genLAnd(e->e1->ATTR(val), e->e2->ATTR(val)));
+    
+    //e->ATTR(val)= tr->genLAnd(e->e1->ATTR(val), e->e2->ATTR(val));
+    tr->genJump(L2);
+    tr->genMarkLabel(L1);
+    tr->genAssign(temp, tr->genLoadImm4(0));
+    
+    //e->ATTR(val)= tr->genLoadImm4(0);
+    tr->genMarkLabel(L2);
+    e->ATTR(val)= temp;
+    
 }
 
 /* Translating an ast::OrExpr node.
  */
 void Translation::visit(ast::OrExpr *e) {
+    Temp temp = tr->getNewTempI4();
+    Label L1=tr->getNewLabel();
+    Label L2=tr->getNewLabel();
     e->e1->accept(this);
+    tr->genJumpOnZero(L1,e->e1->ATTR(val));
+    tr->genAssign(temp, tr->genLoadImm4(1));
+    
+    //e->ATTR(val)= tr->genLoadImm4(1);
+    tr->genJump(L2);
+    tr->genMarkLabel(L1);
     e->e2->accept(this);
-
-    e->ATTR(val) = tr->genLOr(e->e1->ATTR(val), e->e2->ATTR(val));
+    tr->genAssign(temp, tr->genLOr(e->e1->ATTR(val), e->e2->ATTR(val)));
+    
+    //e->ATTR(val)= tr->genLOr(e->e1->ATTR(val), e->e2->ATTR(val));
+    tr->genMarkLabel(L2);
+    e->ATTR(val)= temp;
 }
 /* Translating an ast::DivExpr node.
  */

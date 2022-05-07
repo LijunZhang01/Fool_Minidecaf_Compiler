@@ -74,3 +74,23 @@ void BreakStmt::dumpTo(std::ostream &os) {
     newLine(os);
     decIndent(os);
 }
+
+ContStmt::ContStmt(Location *l) { setBasicInfo(CONT_STMT, l); }
+
+/* Visits the current node.
+ *
+ * PARAMETERS:
+ *   v       - the visitor
+ */
+void ContStmt::accept(Visitor *v) { v->visit(this); }
+
+/* Prints the current AST node.
+ *
+ * PARAMETERS:
+ *   os      - the output stream
+ */
+void ContStmt::dumpTo(std::ostream &os) {
+    ASTNode::dumpTo(os);
+    newLine(os);
+    decIndent(os);
+}
