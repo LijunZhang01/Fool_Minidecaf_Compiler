@@ -91,14 +91,15 @@ void scan_end();
 %token <std::string> IDENTIFIER "identifier"
 %token<int> ICONST "iconst"
 %nterm<mind::ast::StmtList*> StmtList
-%nterm<mind::ast::VarList* > FormalList DouList
+%nterm<mind::ast::VarList* > FormalList DouList 
 %nterm<mind::ast::Program* > Program FoDList
 %nterm<mind::ast::FuncDefn* > FuncDefn
 %nterm<mind::ast::Type*> Type
 %nterm<mind::ast::Statement*> Stmt  ReturnStmt ExprStmt IfStmt  CompStmt WhileStmt DeclStmt DeclStmt1 DeclStmt2 DoWhileStmt ForStmt
 %nterm<mind::ast::Expr*> Expr LvalueExpr FExpr
 %nterm<mind::ast::VarRef*> VarRef
-%nterm<mind::ast::DeclList*> DeclList
+%nterm<mind::ast::ExprList*> ExprList
+
 /*   SUBSECTION 2.2: associativeness & precedences */
 
 %left     ASSIGN
@@ -141,7 +142,19 @@ FuncDefn : Type IDENTIFIER LPAREN FormalList RPAREN LBRACE StmtList RBRACE {
               $$ = new ast::FuncDefn($2,$1,$4,new ast::EmptyStmt(POS(@6)),POS(@1));
           }
 FormalList :  /* EMPTY */
-            {$$ = new ast::VarList();} 
+                {$$ = new ast::VarList();} 
+
+            |  Type IDENTIFIER FormalList
+                { $3->append(new ast::VarDecl($2,$1,POS(@1)));
+                  $$=$3;
+                }
+            |  COMMA Type IDENTIFIER  FormalList
+                { $4->append(new ast::VarDecl($3,$2,POS(@1)));
+                  $$=$4;
+                }
+            ;
+
+
 
 Type        : INT 
                 { $$ = new ast::IntType(POS(@1)); }
@@ -229,6 +242,20 @@ ReturnStmt  : RETURN Expr SEMICOLON
 ExprStmt    : Expr SEMICOLON
                 { $$ = new ast::ExprStmt($1, POS(@1)); } 
             ;         
+
+ExprList    :  /* empty */
+                { $$ = new ast::ExprList(); }
+            |   Expr ExprList 
+                { $2->append($1);
+                  $$ = $2;
+                }
+            |   COMMA Expr ExprList
+                { $3->append($2);
+                  $$ = $3;
+                }
+            ;
+
+
 Expr        : ICONST
                 { $$ = new ast::IntConst($1, POS(@1)); }            
             | LPAREN Expr RPAREN
@@ -271,6 +298,8 @@ Expr        : ICONST
                 { $$ = new ast::OrExpr($1,$3, POS(@2)); }
             | Expr QUESTION Expr COLON Expr %prec QUESTION
                 { $$ = new ast::IfExpr($1, $3, $5, POS(@1)); }
+            | IDENTIFIER LPAREN ExprList RPAREN
+                { $$ = new ast::CallExpr($1, $3, POS(@1)); }
             ;
 
 %%

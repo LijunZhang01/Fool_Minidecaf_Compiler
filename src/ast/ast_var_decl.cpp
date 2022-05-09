@@ -80,6 +80,16 @@ VarDecl::VarDecl(std::string n, Type *t, int d, Location *l) {
     init = NULL;
 }
 
+VarDecl::VarDecl(std::string n, Type *t, Location *l) {
+
+    setBasicInfo(VAR_DECL, l);
+
+    name = n;
+    type = t;
+    init = NULL;
+    lian=NULL;
+}
+
 /* Visits the current node.
  *
  * PARAMETERS:

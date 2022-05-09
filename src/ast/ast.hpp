@@ -185,7 +185,7 @@ class VarDecl : public Statement {
   public:
     VarDecl(std::string name, Location *l);
     VarDecl(std::string name, Type *type, int dim, Location *l);
-
+    VarDecl(std::string name, Type *type,  Location *l);
     VarDecl(std::string name, Type *type, DouList *lian,Location *l);
     VarDecl(std::string name, Type *type, Expr *init, DouList *lian,Location *l);
 
@@ -816,6 +816,19 @@ class BitNotExpr : public Expr {
 
   public:
     Expr *e;
+};
+
+class CallExpr : public Expr {
+  public:
+    CallExpr(std::string name, ExprList * e,Location *l);
+
+    virtual void accept(Visitor *);
+    virtual void dumpTo(std::ostream &);
+
+  public:
+    std::string name;
+    ExprList *elist;
+    symb::Function *ATTR(sym);
 };
 extern bool print_decorated_ast;
 } // namespace ast

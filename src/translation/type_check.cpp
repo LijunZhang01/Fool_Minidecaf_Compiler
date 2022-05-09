@@ -4,7 +4,7 @@
  *  In the second pass, we will check:
  *    1. whether all the expressions are well-typed; (and sets ATTR(type))
  *    2. whether all the statements are well-formed;
- *    3. whether all the referenced symbols are well-defined. (and sets
+ *    3. . whether all the referenced symbols are well-defined(and sets
  * ATTR(sym))
  *
  *  Keltin Leung 
@@ -70,6 +70,8 @@ class SemPass2 : public ast::Visitor {
     virtual void visit(ast::FuncDefn *);
     virtual void visit(ast::Program *);
     virtual void visit(ast::IfExpr *s);
+
+    virtual void visit(ast::CallExpr *s);
 };
 
 // recording the current return type
@@ -361,6 +363,46 @@ void SemPass2::visit(ast::VarRef *ref) {
         }
     }
 
+    return;
+
+    // sometimes "GOTO" will make things simpler. this is one of such cases:
+issue_error_type:
+    ref->ATTR(type) = BaseType::Error;
+    ref->ATTR(sym) = NULL;
+    return;
+}
+
+void SemPass2::visit(ast::CallExpr *ref) {
+    // CASE I: owner is NULL ==> referencing a local var or a member var?
+
+    //检查函数名是否被定义
+    Function *v = (Function *)scopes->lookup(ref->name, ref->getLocation());
+    util::List<Type *>::iterator iter1 = v->getType()->getArgList()->begin();//函数定义时存储的形参数类型,放在这里防止goto报错
+    if (NULL == v) {
+        issue(ref->getLocation(), new SymbolNotFoundError(ref->name));
+        goto issue_error_type;
+
+    } else if (!v->isVariable()) {
+        issue(ref->getLocation(), new NotVariableError(v));
+        goto issue_error_type;
+
+    } else {
+        ref->ATTR(type) = v->getResultType(); //函数的返回类型
+        ref->ATTR(sym) = v;
+    }
+
+    //检查参数的数量是否和函数定义的数量相同
+    if(ref->elist->length()!=v->getType()->numOfParameters()){
+        issue(ref->getLocation(),new SymbolNotFoundError(ref->name));
+    }
+
+    //检查每一个参数的类型是否一致，其实只有int，感觉不用检查，~~~~~
+    
+    for(auto item:*(ref->elist)){
+        item->accept(this);
+        expect(item,*iter1);
+        ++iter1;
+    }
     return;
 
     // sometimes "GOTO" will make things simpler. this is one of such cases:
