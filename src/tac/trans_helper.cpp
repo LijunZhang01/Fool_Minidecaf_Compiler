@@ -422,6 +422,12 @@ Temp TransHelper::genPop(void) {
     return c;
 }
 
+
+Temp TransHelper::genCall(Label label) {
+    Temp c = getNewTempI4();
+    chainUp(Tac::Call(c, label));
+    return c;
+}
 /* Appends a Push tac node to the current list.
  *
  * PARAMETERS:

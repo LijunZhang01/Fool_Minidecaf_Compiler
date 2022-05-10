@@ -530,6 +530,16 @@ Tac *Tac::Push(Temp src) {
     return t;
 }
 
+Tac *Tac::Call(Temp src,Label label) {
+    REQUIRE_I4(src);
+
+    Tac *t = allocateNewTac(Tac::CALL);
+    t->op0.var = src;
+    t->op1.label = label;
+
+    return t;
+}
+
 /* Creates a Pop tac.
  *
  * NOTE:
@@ -631,6 +641,11 @@ std::ostream &mind::operator<<(std::ostream &os, Functy f) {
  */
 void Tac::dump(std::ostream &os) {
     switch (op_code) {
+    case CALL:
+        os << "    " << op0.var << " <- call " << op1.label << "'";
+        break;
+        //os << "    call '" << op1.label << "'";
+        //break;
     case MEMO:
         os << "    memo '" << op0.memo << "'";
         break;

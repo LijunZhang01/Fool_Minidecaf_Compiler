@@ -79,11 +79,13 @@ FuncType *Function::getType(void) { return (FuncType *)type; }
  */
 void Function::appendParameter(Variable *arg) {
     mind_assert(NULL != arg);
+    //重点：主体是给变量设置is_par...和变量的order
     //设置变量次序
     //设置命令的
     // it is your responsibility to check "arg" before invoking this method
     arg->setParameter();
     arg->setOrder(getType()->numOfParameters());
+    //维护函数的arglist
     getType()->appendParameter(arg->getType());
     // usually the symbol has already been added into the associated scope,
     // we just make sure it is right (and we will ignore the duplicated

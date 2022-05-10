@@ -453,6 +453,17 @@ void Translation::visit(ast::LvalueExpr *e) {
     }
 }
 
+
+void Translation::visit(ast::CallExpr *e) {
+    for(auto expr : *(e->elist)){
+        expr->accept(this); 
+        assert(expr->ATTR(val) != NULL);
+        tr->genPush(expr->ATTR(val));
+    }
+    e->ATTR(val) = tr->genCall(e->ATTR(sym)->getEntryLabel());
+    assert(e->ATTR(val) != NULL);
+}
+
 /* Translating an ast::VarRef node.
  *
  * NOTE:
