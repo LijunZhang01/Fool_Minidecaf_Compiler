@@ -1,9 +1,9 @@
+int sum(int a, int b) {
+    return a + b;
+}
+
 int main() {
-    int sum = 0;
-    int i=0;
-    for (i = 0; i < 10; i = i + 1) {
-        sum = sum + i;
-        
-    }
-    return sum;
+    int a = sum(1, 2) - (sum(1, 2) / 2) * 2;
+    int b = 2*sum(3, 4) + sum(1, 2);
+    return b - a;
 }

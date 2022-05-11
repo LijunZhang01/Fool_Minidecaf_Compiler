@@ -25,12 +25,14 @@
 #include <cstring>
 #include <iostream>
 #include <memory>
+#include <list>
 
 /* declaration of some global data & functions you will use */
 namespace mind {
 
 extern scope::ScopeStack *scopes;
 extern ast::Type *quanju;
+extern std::list<mind::tac::Tac> canlian ;
 
 /* Output Functions */
 std::ostream &operator<<(std::ostream &, Location *);

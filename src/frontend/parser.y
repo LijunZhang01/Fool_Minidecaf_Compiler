@@ -257,11 +257,14 @@ ExprList    :  /* empty */
 
 
 Expr        : ICONST
-                { $$ = new ast::IntConst($1, POS(@1)); }            
+                { $$ = new ast::IntConst($1, POS(@1)); }
+            | IDENTIFIER LPAREN ExprList RPAREN
+                { $$ = new ast::CallExpr($1, $3, POS(@1)); }         
             | LPAREN Expr RPAREN
                 { $$ = $2; }
             | LvalueExpr
                 { $$ = $1; }
+            
             | Expr PLUS Expr %prec PLUS
                 { $$ = new ast::AddExpr($1, $3, POS(@2)); }
             | Expr MINUS Expr %prec MINUS
@@ -298,8 +301,7 @@ Expr        : ICONST
                 { $$ = new ast::OrExpr($1,$3, POS(@2)); }
             | Expr QUESTION Expr COLON Expr %prec QUESTION
                 { $$ = new ast::IfExpr($1, $3, $5, POS(@1)); }
-            | IDENTIFIER LPAREN ExprList RPAREN
-                { $$ = new ast::CallExpr($1, $3, POS(@1)); }
+            
             ;
 
 %%

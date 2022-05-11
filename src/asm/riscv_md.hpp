@@ -87,6 +87,7 @@ struct RiscvInstr : public Instr {
 
         //step2
         ADD,
+        ADDI,
         SUB,
         MUL,
         DIV,
@@ -118,7 +119,8 @@ struct RiscvInstr : public Instr {
         AND,
         OR,
         //STEP4
-        ASSIGN
+        ASSIGN,
+        CALL
         // You could add other instructions/pseudo instructions here
     } op_code; // operation code
 
@@ -170,6 +172,10 @@ class RiscvDesc : public MachineDesc {
     void emitLoadImm4Tac(tac::Tac *);
     // translates a Unary TAC into assembly instructions
     void emitUnaryTac(RiscvInstr::OpCode, tac::Tac *);
+
+    void emitCallTac(RiscvInstr::OpCode, tac::Tac *);
+    void emitPushTac(tac::Tac *);
+    
     // translates a Binary TAC into assembly instructions
     void emitBinaryTac(RiscvInstr::OpCode, tac::Tac *);
     //STEP4

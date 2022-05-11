@@ -382,7 +382,7 @@ void SemPass2::visit(ast::CallExpr *ref) {
         issue(ref->getLocation(), new SymbolNotFoundError(ref->name));
         goto issue_error_type;
 
-    } else if (!v->isVariable()) {
+    } else if (!v->isFunction()) {
         issue(ref->getLocation(), new NotVariableError(v));
         goto issue_error_type;
 

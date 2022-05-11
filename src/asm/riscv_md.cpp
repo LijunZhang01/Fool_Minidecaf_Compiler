@@ -13,6 +13,7 @@
 #include "symb/symbol.hpp"
 #include "tac/flow_graph.hpp"
 #include "tac/tac.hpp"
+#include "list"
 
 #include <cstring>
 #include <iomanip>
@@ -27,6 +28,7 @@ using namespace mind;
 #define EMPTY_STR std::string()
 #define WORD_SIZE 4
 
+std::list<Tac> mind::canlian;
 /* Constructor of RiscvReg.
  *
  * PARAMETERS:
@@ -219,6 +221,14 @@ void RiscvDesc::emitTac(Tac *t) {
     addInstr(RiscvInstr::COMMENT, NULL, NULL, NULL, 0, EMPTY_STR, oss.str().c_str() + 4);
 
     switch (t->op_code) {
+    case Tac::CALL:
+        emitCallTac(RiscvInstr::CALL,t);
+        break;
+    case Tac::PUSH:
+        //顺序原因，什么都不做。emitCallTac会进行调用emitPush调用
+        emitPushTac(t);
+        break;
+
     case Tac::LOAD_IMM4:
         emitLoadImm4Tac(t);
         break;
@@ -324,6 +334,84 @@ void RiscvDesc::emitAssignTac(RiscvInstr::OpCode op, Tac *t) {
     addInstr(op, _reg[r0], _reg[r1], NULL, 0, EMPTY_STR, NULL);
 }
 
+
+void RiscvDesc::emitCallTac(RiscvInstr::OpCode op,Tac *t) {
+
+    //将call指令后面liveout入栈
+    Set<Temp>* liveness = t->LiveOut->clone();
+
+    {
+        int cnt = 0;
+        for(auto temp : *liveness){
+            cnt -= 4;
+            int r1 = getRegForRead(temp, 0, t->LiveOut);
+            addInstr(RiscvInstr::SW,  _reg[r1], _reg[RiscvReg::SP], NULL, cnt, EMPTY_STR, NULL);
+        }
+        addInstr(RiscvInstr::ADDI, _reg[RiscvReg::SP], _reg[RiscvReg::SP], NULL, cnt, EMPTY_STR, NULL);
+    }
+    //参数传递
+    // int count = 0,count1=0;
+    // Tac *it = t->prev;
+    // while (it != NULL)
+    // {
+    //     if(it->op_code == Tac::PUSH){
+    //         count += 4;
+    //     }
+    //     it = it->prev;
+    // }
+    
+    //for(Tac *it = t->prev; it != NULL && it->op_code == Tac::PUSH; it = it->prev) count += 4,count1++;
+    int count=canlian.size()*4;
+    int cnt = count;
+    addInstr(RiscvInstr::ADDI, _reg[RiscvReg::SP], _reg[RiscvReg::SP], NULL, -count, EMPTY_STR, NULL);
+
+    for(auto item:canlian){
+        cnt -= 4;
+        int r1 = getRegForRead(item.op0.var, 0, item.LiveOut);
+        addInstr(RiscvInstr::SW,  _reg[r1], _reg[RiscvReg::SP], NULL, cnt, EMPTY_STR, NULL);
+    }
+    canlian.clear();
+    // if(count > 0){
+        
+    //     addInstr(RiscvInstr::ADDI, _reg[RiscvReg::SP], _reg[RiscvReg::SP], NULL, -count, EMPTY_STR, NULL);
+    //     int cnt = count;
+    //     for(Tac *it = t->prev; it != NULL && it->op_code == Tac::PUSH; it = it->prev){
+    //         cnt -= 4;
+    //         int r1 = getRegForRead(it->op0.var, 0, it->LiveOut);
+    //         addInstr(RiscvInstr::SW,  _reg[r1], _reg[RiscvReg::SP], NULL, cnt, EMPTY_STR, NULL);
+    //     }
+        // for(int i=0;i<count1;i++){
+        //     emitPushTac(t);
+        //}
+    //}
+    count += liveness->size() * 4;
+
+    addInstr(op, NULL, NULL, NULL, 0, std::string("_") + t->op1.label->str_form, NULL);
+    
+    //栈恢复过程
+    {
+        int cnt = 0;
+        addInstr(RiscvInstr::ADDI, _reg[RiscvReg::SP], _reg[RiscvReg::SP], NULL, count, EMPTY_STR, NULL);
+        for(auto temp: *liveness){
+            cnt -= 4;
+            int r1 = getRegForWrite(temp, 0, 0, t->LiveOut);
+            addInstr(RiscvInstr::LW,  _reg[r1], _reg[RiscvReg::SP], NULL, cnt, EMPTY_STR, NULL);
+        }
+    }
+    //将结果送到指定的寄存器
+    int r0 = getRegForWrite(t->op0.var, 0, 0, t->LiveOut);
+    addInstr(RiscvInstr::MOVE, _reg[r0], _reg[RiscvReg::A0], NULL, 0, EMPTY_STR, NULL);
+    
+}
+
+//参数入栈
+void RiscvDesc::emitPushTac(Tac *t) {
+    // int r1 = getRegForRead(t->op0.var, 0, t->LiveOut);
+    // addInstr(RiscvInstr::ADDI, _reg[RiscvReg::SP], _reg[RiscvReg::SP], NULL, -4, EMPTY_STR, NULL);
+    // addInstr(RiscvInstr::SW,  _reg[r1], _reg[RiscvReg::SP], NULL, 0, EMPTY_STR, NULL);
+    canlian.push_front(*t);
+}
+
 /* Translates a Unary TAC into Riscv instructions.
  *
  * PARAMETERS:
@@ -421,6 +509,7 @@ void RiscvDesc::emit(std::string label, const char *body, const char *comment) {
  *   f     - the Functy object
  */
 void RiscvDesc::emitFuncty(Functy f) {
+    
     mind_assert(NULL != f);
 
     _frame = new RiscvStackFrameManager(-3 * WORD_SIZE);
@@ -608,7 +697,12 @@ void RiscvDesc::emitInstr(RiscvInstr *i) {
     case RiscvInstr::ASSIGN:
         oss << "mv" << i->r0->name << ", " << i->r1->name;
         break;
-
+    case RiscvInstr::ADDI:
+        oss << "addi" << i->r0->name << ", " << i->r1->name<< ", " << i->i;
+        break;
+    case RiscvInstr::CALL:
+        oss << "call" << i->l;
+        break;
     default:
         mind_assert(false); // other instructions not supported
     }

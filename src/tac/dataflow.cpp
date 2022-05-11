@@ -2,7 +2,7 @@
  *  Variable Liveness Analysis.
  *
  *  This file contains the implementation of the following 3 functions:
- *  1. BasicBlock::computeDefAndLiveUse
+ *  . BasicBlock::computeDefAndLiveUse1
  *  2. FlowGraph::analyzeLiveness
  *  3. BasicBlock::analysisLiveness
  * 
@@ -74,6 +74,7 @@ void BasicBlock::computeDefAndLiveUse(void) {
             break;
 
         case Tac::PUSH:
+        case Tac::CALL:
             updateLU(t->op0.var);
             break;
 
@@ -224,6 +225,7 @@ void BasicBlock::analyzeLiveness(void) {
             break;
 
         case Tac::PUSH:
+        case Tac::CALL:
             t->LiveOut->add(t_next->op0.var);
             break;
 
