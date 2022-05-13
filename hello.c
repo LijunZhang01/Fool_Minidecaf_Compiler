@@ -1,9 +1,10 @@
-int sum(int a, int b) {
-    return a + b;
+int sub_3(int x, int y, int z) {
+    return x - y - z;
 }
 
 int main() {
-    int a = sum(1, 2) - (sum(1, 2) / 2) * 2;
-    int b = 2*sum(3, 4) + sum(1, 2);
-    return b - a;
+    int a=3,d=7;
+    int b=sub_3(10, 4, 2);
+    int c=a+b+d;
+    return c;
 }

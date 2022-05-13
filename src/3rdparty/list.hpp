@@ -82,6 +82,10 @@ namespace mind {
 		_l.push_back (e);
 	  }
 	  
+	   void     append_my(const _T& e) {
+		_l.push_front (e);
+	  }
+
 	  // Inserts an element at the head of the list
 	  void     addAtHead(const _T& e) {
 		_l.push_front (e);

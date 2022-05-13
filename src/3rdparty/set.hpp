@@ -160,23 +160,36 @@ namespace mind {
 	  }
 
 	  void remove(const _T e) {
-		_T* p = std::lower_bound(begin(), end(), e);
+   		 _T* p = std::lower_bound(begin(), end(), e);
 
-		if (*p == e) {
-		  std::copy(p+1, end(), p);
-		  --_size;
-		}
-	  }
+    	if (p!=end() && *p == e) {
+        	std::copy(p+1, end(), p);
+        	--_size;
+    	}
+	 }
+
+	//   void remove(const _T e) {
+	// 	_T* p = std::lower_bound(begin(), end(), e);
+
+	// 	if (*p == e) {
+	// 	  std::copy(p+1, end(), p);
+	// 	  --_size;
+	// 	}
+	//   }
 
 	  bool empty(void) const {
 		return (0 == _size);
 	  }
-	  
 	  bool contains(const _T e) const {
-		const _T* p = std::lower_bound(begin(), end(), e);
+    	const _T* p = std::lower_bound(begin(), end(), e);
+    	return (p!=end() && (*p == e));
+	  } 
 
-		return (*p == e);
-	  }
+	//   bool contains(const _T e) const {
+	// 	const _T* p = std::lower_bound(begin(), end(), e);
+
+	// 	return (*p == e);
+	//   }
 
 	  void clear(void) {
 		_size = 0;

@@ -246,11 +246,11 @@ ExprStmt    : Expr SEMICOLON
 ExprList    :  /* empty */
                 { $$ = new ast::ExprList(); }
             |   Expr ExprList 
-                { $2->append($1);
+                { $2->append_my($1);
                   $$ = $2;
                 }
             |   COMMA Expr ExprList
-                { $3->append($2);
+                { $3->append_my($2);
                   $$ = $3;
                 }
             ;

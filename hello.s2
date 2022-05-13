@@ -1,0 +1,75 @@
+          .text                         
+          .globl main                   
+          .align 2                      
+
+          .text                         
+_sub_3:                                 # function entry
+          sw    ra, -4(sp)              
+          sw    fp, -8(sp)              
+          mv    fp, sp                  
+          addi  sp, sp, -8              
+__LL0:                                  
+                                  # T3 <- (T2 - T1)
+          lw    t0, 8(fp)               # load T2 from (fp+8) into t0
+          lw    t1, 4(fp)               # load T1 from (fp+4) into t1
+          sub   t2, t0, t1              
+                                  # T4 <- (T3 - T0)
+          lw    s1, 0(fp)               # load T0 from (fp+0) into s1
+          sub   s2, t2, s1              
+          mv    a0, s2                  
+          mv    sp, fp                  
+          lw    ra, -4(fp)              
+          lw    fp, -8(fp)              
+          ret                           
+
+          .text                         
+main:                                   # function entry
+          sw    ra, -4(sp)              
+          sw    fp, -8(sp)              
+          mv    fp, sp                  
+          addi  sp, sp, -16             
+__LL1:                                  
+                                  # ý
+          li    t0, 3                   
+                                  # ý
+          mv    t1, t0                  
+                                  # ý
+          li    t2, 7                   
+                                  # ý
+          mv    s1, t2                  
+                                  # ý
+          li    s2, 10                  
+                                  # ý
+          addi  sp, sp, -4              
+          sw    s2, 0(sp)               
+                                  # ý
+          li    s3, 4                   
+                                  # ý
+          addi  sp, sp, -4              
+          sw    s3, 0(sp)               
+                                  # ý
+          li    s4, 2                   
+                                  # ý
+          addi  sp, sp, -4              
+          sw    s4, 0(sp)               
+                                  # T14 <- call _sub_3'
+                                  # (save modified registers before control flow changes)
+          sw    t1, -12(fp)             # spill T6 from t1 to (fp-12)
+          sw    s1, -16(fp)             # spill T8 from s1 to (fp-16)
+          call  _sub_3                  
+          mv    t0, a0                  
+                                  # ý
+          mv    t1, t0                  
+                                  # T16 <- (T6 + T10)
+          lw    t2, -12(fp)             # load T6 from (fp-12) into t2
+          add   s1, t2, t1              
+                                  # T17 <- (T16 + T8)
+          lw    s2, -16(fp)             # load T8 from (fp-16) into s2
+          add   s3, s1, s2              
+                                  # ý
+          mv    s4, s3                  
+          mv    a0, s4                  
+          mv    sp, fp                  
+          lw    ra, -4(fp)              
+          lw    fp, -8(fp)              
+          ret                           
