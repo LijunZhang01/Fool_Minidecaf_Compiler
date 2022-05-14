@@ -510,5 +510,25 @@ void TransHelper::genMemo(const char *comment) { chainUp(Tac::Memo(comment)); }
  *
  * RETURNS:
  *   the Piece list (representing as a single linked list)
+ * 
+ * 
  */
+
+
+Temp TransHelper::genLoadSymbol(std::string label){
+    Temp c = getNewTempI4();
+    chainUp(Tac::LoadSymbol(c, label));
+    return c;
+}
+
+Temp TransHelper::genLoad(Temp temp, int offset){
+    Temp c = getNewTempI4();
+    chainUp(Tac::Load(c, temp, offset));
+    return c;
+}
+
+void TransHelper::genStore(Temp src, Temp base, int offset){
+    chainUp(Tac::Store(src, base, offset));
+}
+
 Piece *TransHelper::getPiece(void) { return head.next; }

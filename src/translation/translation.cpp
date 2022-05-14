@@ -98,11 +98,21 @@ void Translation::visit(ast::AssignExpr *s) {
     // TODO
     s->left->accept(this);
     s->e->accept(this);
-    //ast::VarRef *ref = (ast::VarRef *)(s->left);
+    ast::VarRef *ref = (ast::VarRef *)(s->left);
     //Temp temp = ref->ATTR(sym)->getTemp();
-    Temp temp = ((ast::VarRef *)(s->left))->ATTR(sym)->getTemp();
-    tr->genAssign(temp, s->e->ATTR(val)); 
-    s->ATTR(val) = temp;
+    if(ref->ATTR(sym)->isGlobalVar()){
+        Temp temp = tr->genLoadSymbol(ref->var);
+        // if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAY_ELE)
+        //     temp = tr->genAdd(temp, ref->expr->ATTR(val));
+        tr->genStore(s->e->ATTR(val), temp, 0);
+        s->ATTR(val) = s->e->ATTR(val);
+    }
+    else{
+        Temp temp = ((ast::VarRef *)(s->left))->ATTR(sym)->getTemp();
+        tr->genAssign(temp, s->e->ATTR(val)); 
+        s->ATTR(val) = temp;
+    }
+    
 }
 
 /* Translating an ast::ExprStmt node.
@@ -444,8 +454,21 @@ void Translation::visit(ast::LvalueExpr *e) {
     e->lvalue->accept(this);
     switch (e->lvalue->getKind()) {
         case ast::ASTNode::VAR_REF:{
-            //ast::VarRef *ref = (ast::VarRef *)e->lvalue;
-            e->ATTR(val) = ((ast::VarRef *)e->lvalue)->ATTR(sym)->getTemp();
+            ast::VarRef *ref = (ast::VarRef *)e->lvalue;
+            if(ref->ATTR(sym)->isGlobalVar()){
+                Temp temp = tr->genLoadSymbol(ref->ATTR(sym)->getName());
+                // if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAemitpY_ELE)
+                //     temp = tr->genAdd(temp, ref->expr->ATTR(val));
+                e->ATTR(val) = tr->genLoad(temp, 0);
+            }
+            else {
+                // if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAY_ELE){
+                //     Temp temp = tr->genAdd(ref->ATTR(sym)->getTemp(), ref->expr->ATTR(val));
+                //     e->ATTR(val) = tr->genLoad(temp, 0);
+                // }
+                // else 
+                e->ATTR(val) = ref->ATTR(sym)->getTemp();
+            }
             break;
         }
         default:
@@ -489,18 +512,34 @@ void Translation::visit(ast::VarDecl *decl) {
     // TODO
     //具体步骤就是先为这个变量的左值分配一个Temp，若在变量的定义中发现他拥有赋值的操作，那就应该生成Assign语句的
     //三元表达式
-    decl->ATTR(sym)->attachTemp(tr->getNewTempI4());
-    if(decl->init!=NULL){
-        decl->init->accept(this);
-        tr->genAssign(decl->ATTR(sym)->getTemp(),decl->init->ATTR(val));
-    }
-    if(decl->lian!=NULL){
-        for(ast::DouList::iterator it=decl->lian->begin();
-        it!=decl->lian->end();++it){
-            (*it)->accept(this);
+    if(decl->ATTR(sym)->isGlobalVar()){
+        //为全局变量赋初值
+        if(decl->init==NULL){
+            decl->ATTR(sym)->setGlobalInit(0);
         }
+        else{
+            //decl->ATTR(sym)->setGlobalInit(0);
+            decl->init->accept(this);
+            assert(decl->init->getKind() == ast::ASTNode::INT_CONST);
+            decl->ATTR(sym)->setGlobalInit(((ast::IntConst *)(decl->init))->value);
+        }
+        
+    }
+    else{
+        decl->ATTR(sym)->attachTemp(tr->getNewTempI4());
+        if(decl->init!=NULL){
+            decl->init->accept(this);
+            tr->genAssign(decl->ATTR(sym)->getTemp(),decl->init->ATTR(val));
+        }
+        
     }
     
+    if(decl->lian!=NULL){
+            for(ast::DouList::iterator it=decl->lian->begin();
+            it!=decl->lian->end();++it){
+                (*it)->accept(this);
+            }
+        }
 }
 
 

@@ -94,7 +94,10 @@ struct Tac {
         RETURN,
         LOAD_IMM4,
         MEMO,
-        CALL
+        CALL,
+        LOADSYMBOL,
+        LOAD,
+        STORE
     } Kind;
 
     // Operand type
@@ -147,6 +150,9 @@ struct Tac {
     static Tac *Mark(Label label);
     static Tac *Memo(const char *);
     static Tac *Call(Temp src,Label label);
+    static Tac *LoadSymbol(Temp dest, std::string label);
+    static Tac *Load(Temp dest, Temp src, int offset);
+    static Tac *Store(Temp src, Temp base, int offset);
 
 
     // dumps a single tac node to some output stream

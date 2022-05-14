@@ -119,6 +119,40 @@ void RiscvDesc::emitPieces(scope::GlobalScope *gscope, Piece *ps,
     if (Option::getLevel() == Option::ASMGEN) {
         // program preamble
         emit(EMPTY_STR, ".text", NULL);
+        
+
+
+        emit(EMPTY_STR, ".data", NULL);
+        for(auto item=gscope->begin();item!=gscope->end();item++)
+        {
+            if((*item)->isVariable()){
+                os << "          " << std::left << std::setw(30) << ".global "<<(*item)->getName();
+    
+                os << std::endl;
+                os<<(*item)->getName()<<":";
+                os << std::endl;
+                os << "          " << std::left << std::setw(30) << ".word "<<(dynamic_cast<mind::symb::Variable *>(*item))->getGlobalInit();
+                os << std::endl;
+            }
+        }
+            
+            
+        // os << "          " << std::left << std::setw(30) << ".global ";
+
+        // for(auto item=gscope->begin();item!=gscope->end();item++){
+            
+        //     if((*item)->isVariable()){
+        //         os << (*item)->getName() << std::left << std::setw(40 - (*item)->getName().length()) << ":";
+        //         os << std::endl;
+        //         os << "    ";
+        //         os << ".word" << std::left << std::setw(40 - std::string(".word").length()) << " ";
+        //         os<<(dynamic_cast<mind::symb::Variable *>(*item))->getGlobalInit();
+        //     }
+        // }
+        
+        
+
+        
         emit(EMPTY_STR, ".globl main", NULL);
         emit(EMPTY_STR, ".align 2", NULL);
     }
@@ -221,6 +255,18 @@ void RiscvDesc::emitTac(Tac *t) {
     addInstr(RiscvInstr::COMMENT, NULL, NULL, NULL, 0, EMPTY_STR, oss.str().c_str() + 4);
 
     switch (t->op_code) {
+    case Tac::LOADSYMBOL:
+        emitLaTac(RiscvInstr::LA,t);
+        break;
+
+    case Tac::LOAD:
+        
+        emitLwTac(RiscvInstr::LW,t);
+        break;
+    case Tac::STORE:
+        
+        emitSwTac(RiscvInstr::SW,t);
+        break;
     case Tac::CALL:
         emitCallTac(RiscvInstr::CALL,t);
         break;
@@ -311,6 +357,37 @@ void RiscvDesc::emitTac(Tac *t) {
  * PARAMETERS:
  *   t     - the LoadImm4 TAC
  */
+
+void RiscvDesc::emitLaTac(RiscvInstr::OpCode op,Tac *t) {
+    // eliminates useless assignments
+    if (!t->LiveOut->contains(t->op0.var))
+        return;
+
+    // uses "load immediate number" instruction
+    int r0 = getRegForWrite(t->op0.var, 0, 0, t->LiveOut);
+    addInstr(RiscvInstr::LA, _reg[r0], NULL, NULL,0,t->op1.name,
+             NULL);
+}
+
+void RiscvDesc::emitLwTac(RiscvInstr::OpCode op,Tac *t) {
+     if (!t->LiveOut->contains(t->op0.var))
+        return;
+
+    // uses "load immediate number" instruction
+    int r1 = getRegForRead(t->op1.var, 0, t->LiveOut);
+    int r0 = getRegForWrite(t->op0.var, r1, 0, t->LiveOut);
+    addInstr(RiscvInstr::LW, _reg[r0], _reg[r1], NULL, t->op1.offset, EMPTY_STR,
+             NULL);
+}
+
+void RiscvDesc::emitSwTac(RiscvInstr::OpCode op,Tac *t) {
+   
+    int r0 = getRegForRead(t->op0.var, 0, t->LiveOut);
+    int r1 = getRegForRead(t->op1.var, r0, t->LiveOut);
+    addInstr(RiscvInstr::SW, _reg[r0], _reg[r1], NULL, t->op1.offset, EMPTY_STR,
+             NULL);
+}
+
 
 void RiscvDesc::emitLoadImm4Tac(Tac *t) {
     // eliminates useless assignments
@@ -609,6 +686,10 @@ void RiscvDesc::emitInstr(RiscvInstr *i) {
 
     case RiscvInstr::LI:
         oss << "li" << i->r0->name << ", " << i->i;
+        break;
+
+    case RiscvInstr::LA:
+        oss << "la" << i->r0->name << ", " << i->l;
         break;
 
     case RiscvInstr::NEG:

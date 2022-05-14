@@ -46,6 +46,7 @@ void BasicBlock::computeDefAndLiveUse(void) {
         case Tac::NEG:
         case Tac::LNOT:
         case Tac::BNOT:
+        case Tac::LOAD:
             updateLU(t->op1.var);
             updateDEF(t->op0.var);
             break;
@@ -70,12 +71,18 @@ void BasicBlock::computeDefAndLiveUse(void) {
 
         case Tac::POP:
         case Tac::LOAD_IMM4:
+        case Tac::LOADSYMBOL:
             updateDEF(t->op0.var);
             break;
 
         case Tac::PUSH:
         case Tac::CALL:
             updateLU(t->op0.var);
+            break;
+
+        case Tac::STORE:
+            updateLU(t->op0.var);
+            updateLU(t->op1.var);
             break;
 
         default:
@@ -194,6 +201,7 @@ void BasicBlock::analyzeLiveness(void) {
         case Tac::NEG:
         case Tac::LNOT:
         case Tac::BNOT:
+        case Tac::LOAD:
             if (NULL != t_next->op0.var)
                 t->LiveOut->remove(t_next->op0.var);
             t->LiveOut->add(t_next->op1.var);
@@ -220,6 +228,7 @@ void BasicBlock::analyzeLiveness(void) {
 
         case Tac::POP:
         case Tac::LOAD_IMM4:
+        case Tac::LOADSYMBOL:
             if (NULL != t_next->op0.var)
                 t->LiveOut->remove(t_next->op0.var);
             break;
@@ -227,6 +236,11 @@ void BasicBlock::analyzeLiveness(void) {
         case Tac::PUSH:
         case Tac::CALL:
             t->LiveOut->add(t_next->op0.var);
+            break;
+
+        case Tac::STORE:
+            t->LiveOut->add(t_next->op0.var);
+            t->LiveOut->add(t_next->op1.var);
             break;
 
         default:

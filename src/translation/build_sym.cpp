@@ -180,6 +180,8 @@ void SemPass1::visit(ast::CompStmt *c) {
  *   vdecl - the ast::VarDecl node to visit
  */
 void SemPass1::visit(ast::VarDecl *vdecl) {
+    
+
     Type *t = NULL;
 
     vdecl->type->accept(this);
@@ -199,6 +201,11 @@ void SemPass1::visit(ast::VarDecl *vdecl) {
         issue(vdecl->getLocation(),new DeclConflictError(vdecl->name, sym));
     else
         scopes->declare(vdecl->ATTR(sym));
+        
+    // //为全局变量赋初值
+    // if(v->isGlobalVar()){
+    //     v->setGlobalInit(0);
+    // }
     
     if(vdecl->lian!=NULL)
     {    for(ast::DouList::iterator it=vdecl->lian->begin();

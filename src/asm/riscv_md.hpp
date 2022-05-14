@@ -120,7 +120,8 @@ struct RiscvInstr : public Instr {
         OR,
         //STEP4
         ASSIGN,
-        CALL
+        CALL,
+        LA
         // You could add other instructions/pseudo instructions here
     } op_code; // operation code
 
@@ -175,7 +176,9 @@ class RiscvDesc : public MachineDesc {
 
     void emitCallTac(RiscvInstr::OpCode, tac::Tac *);
     void emitPushTac(tac::Tac *);
-    
+    void emitLaTac(RiscvInstr::OpCode,tac::Tac *t);
+    void emitLwTac(RiscvInstr::OpCode,tac::Tac *t);
+    void emitSwTac(RiscvInstr::OpCode,tac::Tac *t);
     // translates a Binary TAC into assembly instructions
     void emitBinaryTac(RiscvInstr::OpCode, tac::Tac *);
     //STEP4

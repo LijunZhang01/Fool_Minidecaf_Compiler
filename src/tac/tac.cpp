@@ -521,6 +521,40 @@ Tac *Tac::JZero(Label dest, Temp cond) {
  * RETURNS:
  *   a Push tac
  */
+
+
+Tac *Tac::LoadSymbol(Temp dest, std::string label) {
+    REQUIRE_I4(dest);
+
+    Tac *t = allocateNewTac(Tac::LOADSYMBOL);
+    t->op0.var = dest;
+    t->op1.name = label;
+
+    return t;
+}
+
+Tac *Tac::Load(Temp dest, Temp src, int offset) {
+    REQUIRE_I4(dest);
+    REQUIRE_I4(src);
+
+    Tac *t = allocateNewTac(Tac::LOAD);
+    t->op0.var = dest;
+    t->op1.var = src;
+    t->op1.offset = offset;
+    return t;
+}
+
+Tac *Tac::Store(Temp src, Temp base, int offset) {
+    REQUIRE_I4(src);
+    REQUIRE_I4(base);
+
+    Tac *t = allocateNewTac(Tac::STORE);
+    t->op0.var = src;
+    t->op1.var = base;
+    t->op1.offset = offset;
+    return t;
+}
+
 Tac *Tac::Push(Temp src) {
     REQUIRE_I4(src);
 
@@ -641,6 +675,16 @@ std::ostream &mind::operator<<(std::ostream &os, Functy f) {
  */
 void Tac::dump(std::ostream &os) {
     switch (op_code) {
+    case LOADSYMBOL:
+        os << "    " << op0.var << " <- LOAD_SYMBOL " << op1.name;
+        break;
+    
+    case LOAD:
+        os << "    " << op0.var << " <- LOAD " << op1.var << ", " << op1.offset;
+        break;
+    case STORE:
+        os << "    STORE " << op0.var << " -> " << op1.var << ", " << op1.offset;
+        break;
     case CALL:
         os << "    " << op0.var << " <- call " << op1.label << "'";
         break;

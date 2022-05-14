@@ -53,6 +53,10 @@ class TransHelper {
     Temp genGeq(Temp, Temp);
     Temp genNeg(Temp);
     Temp genCall(Label);
+
+    Temp genLoad(Temp,int);
+    void genStore(Temp,Temp,int);
+    Temp genLoadSymbol(std::string);
     // Logical
     Temp genLAnd(Temp, Temp);
     Temp genLOr(Temp, Temp);
