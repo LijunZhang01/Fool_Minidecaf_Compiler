@@ -137,6 +137,7 @@ class Expr : public ASTNode {
   public:
     type::Type *ATTR(type); // for semantic analysis
     tac::Temp ATTR(val);    // for tac generation
+    int ATTR(value);
 };
 
 /* Node representing a left-value expression (lvalue).

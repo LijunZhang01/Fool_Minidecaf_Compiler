@@ -112,7 +112,7 @@ void Translation::visit(ast::AssignExpr *s) {
         tr->genAssign(temp, s->e->ATTR(val)); 
         s->ATTR(val) = temp;
     }
-    
+    s->ATTR(value) = s->e->ATTR(value);
 }
 
 /* Translating an ast::ExprStmt node.
@@ -278,6 +278,7 @@ void Translation::visit(ast::AddExpr *e) {
     e->e2->accept(this);
 
     e->ATTR(val) = tr->genAdd(e->e1->ATTR(val), e->e2->ATTR(val));
+    e->ATTR(value)=e->e1->ATTR(value)+e->e2->ATTR(value);
 }
 
 /* Translating an ast::SubExor node.
@@ -287,6 +288,7 @@ void Translation::visit(ast::SubExpr *e) {
     e->e2->accept(this);
 
     e->ATTR(val) = tr->genSub(e->e1->ATTR(val), e->e2->ATTR(val));
+    e->ATTR(value)=e->e1->ATTR(value)-e->e2->ATTR(value);
 }
 
 
@@ -297,6 +299,7 @@ void Translation::visit(ast::MulExpr *e) {
     e->e2->accept(this);
 
     e->ATTR(val) = tr->genMul(e->e1->ATTR(val), e->e2->ATTR(val));
+    e->ATTR(value)=e->e1->ATTR(value)*e->e2->ATTR(value);
 }
 
 /* Translating an ast::LesExpr node.
@@ -306,6 +309,8 @@ void Translation::visit(ast::LesExpr *e) {
     e->e2->accept(this);
 
     e->ATTR(val) = tr->genLes(e->e1->ATTR(val), e->e2->ATTR(val));
+    if(e->e1->ATTR(value)<e->e2->ATTR(value)) e->ATTR(value)=1;
+    else e->ATTR(value)=0;
 }
 
 /* Translating an ast::GrtExpr node.
@@ -315,6 +320,8 @@ void Translation::visit(ast::GrtExpr *e) {
     e->e2->accept(this);
 
     e->ATTR(val) = tr->genGtr(e->e1->ATTR(val), e->e2->ATTR(val));
+    if(e->e1->ATTR(value)>e->e2->ATTR(value)) e->ATTR(value)=1;
+    else e->ATTR(value)=0;
 }
 
 /* Translating an ast::LeqExpr node.
@@ -324,6 +331,8 @@ void Translation::visit(ast::LeqExpr *e) {
     e->e2->accept(this);
 
     e->ATTR(val) = tr->genLeq(e->e1->ATTR(val), e->e2->ATTR(val));
+    if(e->e1->ATTR(value)<=e->e2->ATTR(value)) e->ATTR(value)=1;
+    else e->ATTR(value)=0;
 }
 
 /* Translating an ast::GeqExpr node.
@@ -333,6 +342,8 @@ void Translation::visit(ast::GeqExpr *e) {
     e->e2->accept(this);
 
     e->ATTR(val) = tr->genGeq(e->e1->ATTR(val), e->e2->ATTR(val));
+    if(e->e1->ATTR(value)>=e->e2->ATTR(value)) e->ATTR(value)=1;
+    else e->ATTR(value)=0;
 }
 
 
@@ -343,6 +354,8 @@ void Translation::visit(ast::EquExpr *e) {
     e->e2->accept(this);
 
     e->ATTR(val) = tr->genEqu(e->e1->ATTR(val), e->e2->ATTR(val));
+    if(e->e1->ATTR(value)==e->e2->ATTR(value)) e->ATTR(value)=1;
+    else e->ATTR(value)=0;
 }
 
 /* Translating an ast::NeqExpr node.
@@ -352,6 +365,8 @@ void Translation::visit(ast::NeqExpr *e) {
     e->e2->accept(this);
 
     e->ATTR(val) = tr->genNeq(e->e1->ATTR(val), e->e2->ATTR(val));
+    if(e->e1->ATTR(value)!=e->e2->ATTR(value)) e->ATTR(value)=1;
+    else e->ATTR(value)=0;
 }
 
 /* Translating an ast::AndExpr node.
@@ -373,7 +388,7 @@ void Translation::visit(ast::AndExpr *e) {
     //e->ATTR(val)= tr->genLoadImm4(0);
     tr->genMarkLabel(L2);
     e->ATTR(val)= temp;
-    
+    e->ATTR(value)=e->e1->ATTR(value)&&e->e2->ATTR(value);
 }
 
 /* Translating an ast::OrExpr node.
@@ -395,6 +410,7 @@ void Translation::visit(ast::OrExpr *e) {
     //e->ATTR(val)= tr->genLOr(e->e1->ATTR(val), e->e2->ATTR(val));
     tr->genMarkLabel(L2);
     e->ATTR(val)= temp;
+    e->ATTR(value)=e->e1->ATTR(value)||e->e2->ATTR(value);
 }
 /* Translating an ast::DivExpr node.
  */
@@ -403,6 +419,7 @@ void Translation::visit(ast::DivExpr *e) {
     e->e2->accept(this);
 
     e->ATTR(val) = tr->genDiv(e->e1->ATTR(val), e->e2->ATTR(val));
+    e->ATTR(value)=e->e1->ATTR(value)/e->e2->ATTR(value);
 }
 
 
@@ -413,6 +430,7 @@ void Translation::visit(ast::ModExpr *e) {
     e->e2->accept(this);
 
     e->ATTR(val) = tr->genMod(e->e1->ATTR(val), e->e2->ATTR(val));
+    e->ATTR(value)=e->e1->ATTR(value)%e->e2->ATTR(value);
 }
 
 
@@ -420,6 +438,7 @@ void Translation::visit(ast::ModExpr *e) {
  */
 void Translation::visit(ast::IntConst *e) {
     e->ATTR(val) = tr->genLoadImm4(e->value);
+    e->ATTR(value)=e->value;
 }
 
 /* Translating an ast::NegExpr node.
@@ -428,6 +447,7 @@ void Translation::visit(ast::NegExpr *e) {
     e->e->accept(this);
 
     e->ATTR(val) = tr->genNeg(e->e->ATTR(val));
+    e->ATTR(value)=-(e->e->ATTR(value));
 }
 /* Translating an ast::NotExpr node.
  */
@@ -435,6 +455,8 @@ void Translation::visit(ast::NotExpr *e) {
     e->e->accept(this);
 
     e->ATTR(val) = tr->genLNot(e->e->ATTR(val));
+
+    e->ATTR(value)=~(e->e->ATTR(value));
 }
 /* Translating an ast::BitNotExpr node.
  */
@@ -442,6 +464,9 @@ void Translation::visit(ast::BitNotExpr *e) {
     e->e->accept(this);
 
     e->ATTR(val) = tr->genBNot(e->e->ATTR(val));
+
+    e->ATTR(value)=!(e->e->ATTR(value));
+
 }
 
 /* Translating an ast::LvalueExpr node.
@@ -460,6 +485,17 @@ void Translation::visit(ast::LvalueExpr *e) {
                 // if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAemitpY_ELE)
                 //     temp = tr->genAdd(temp, ref->expr->ATTR(val));
                 e->ATTR(val) = tr->genLoad(temp, 0);
+                scope::Scope *scop_temp=ref->ATTR(sym)->getScope();
+                int jiji=0;
+                for(auto item=scop_temp->begin();item!=scop_temp->end();item++){
+                    if((*item)->getName()==ref->var)
+                    {
+                        e->ATTR(value)=(dynamic_cast<mind::symb::Variable *>(*item))->getGlobalInit();
+                        jiji=1;
+                    }
+                }
+                if(jiji==0) mind_assert(false);
+                
             }
             else {
                 // if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAY_ELE){
@@ -520,8 +556,18 @@ void Translation::visit(ast::VarDecl *decl) {
         else{
             //decl->ATTR(sym)->setGlobalInit(0);
             decl->init->accept(this);
-            assert(decl->init->getKind() == ast::ASTNode::INT_CONST);
-            decl->ATTR(sym)->setGlobalInit(((ast::IntConst *)(decl->init))->value);
+            if(decl->init->getKind() == ast::ASTNode::INT_CONST)
+            {
+                decl->ATTR(sym)->setGlobalInit(((ast::IntConst *)(decl->init))->value);
+            }
+            else if(decl->init->getKind() == ast::ASTNode::CALL_EXPR){
+                assert(decl->init->getKind() == ast::ASTNode::INT_CONST);
+            }
+            else {
+                decl->ATTR(sym)->setGlobalInit(decl->init->ATTR(value));
+            }
+            // assert(decl->init->getKind() == ast::ASTNode::INT_CONST);
+            // decl->ATTR(sym)->setGlobalInit(((ast::IntConst *)(decl->init))->value);
         }
         
     }
