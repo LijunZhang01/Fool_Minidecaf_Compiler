@@ -130,13 +130,31 @@ void RiscvDesc::emitPieces(scope::GlobalScope *gscope, Piece *ps,
                     os << "          " << std::left << std::setw(30) << ".global "<<(*item)->getName();
                     os << std::endl;
                     os<<(*item)->getName()<<":";
-            
                     auto itt=dynamic_cast<mind::symb::Variable *>(*item);
-                    
-                    for(auto it=itt->rdim->begin();it!=itt->rdim->end();it++){
-                        os << "          " << std::left << std::setw(30) << ".word "<<(*it);
+                    if(itt->rdim==NULL){
+                        os << "          " << std::left << std::setw(30) << ".zero "<<itt->getType()->getSize();
                         os << std::endl;
                     }
+                    else{
+                        int a=0;
+                        for(auto it=itt->rdim->begin();it!=itt->rdim->end();it++){
+                            os << "          " << std::left << std::setw(30) << ".word "<<(*it);
+                            os << std::endl;
+                            a+=4;
+                        }
+                        int cha=itt->getType()->getSize()-a;
+                        if(a>0){
+                            os << "          " << std::left << std::setw(30) << ".zero "<<cha;
+                            os << std::endl;
+                        }
+                    }
+            
+                    // auto itt=dynamic_cast<mind::symb::Variable *>(*item);
+                    
+                    // for(auto it=itt->rdim->begin();it!=itt->rdim->end();it++){
+                    //     os << "          " << std::left << std::setw(30) << ".word "<<(*it);
+                    //     os << std::endl;
+                    // }
                     
                     
                 }

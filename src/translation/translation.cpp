@@ -577,26 +577,26 @@ void Translation::visit(ast::VarDecl *decl) {
     //三元表达式
     if(decl->ATTR(sym)->isGlobalVar()){
         if(decl->type->ATTR(type)->isArrayType()){
-            if(decl->ATTR(sym)->rdim==NULL){
-                int a=decl->ATTR(sym)->getType()->getSize();
-                decl->ATTR(sym)->rdim=new ast::DimList();
-                // std::cout<<a;
-                while(a>0){
-                    decl->ATTR(sym)->rdim->append_my(0);
-                    a-=4;
-                }
-            }
-            else{
-                int a=decl->ATTR(sym)->getType()->getSize();
-                int b=decl->ATTR(sym)->rdim->length();
-                if(a>b){
-                    int c=a-b;
-                    while(c>0){
-                        decl->ATTR(sym)->rdim->append(0);
-                        c-=4;
-                    }
-                }
-            }
+            // if(decl->ATTR(sym)->rdim==NULL){
+            //     int a=decl->ATTR(sym)->getType()->getSize();
+            //     decl->ATTR(sym)->rdim=new ast::DimList();
+            //     // std::cout<<a;
+            //     while(a>0){
+            //         decl->ATTR(sym)->rdim->append_my(0);
+            //         a-=4;
+            //     }
+            // }
+            // else{
+            //     int a=decl->ATTR(sym)->getType()->getSize();
+            //     int b=decl->ATTR(sym)->rdim->length();
+            //     if(a>b){
+            //         int c=a-b;
+            //         while(c>0){
+            //             decl->ATTR(sym)->rdim->append(0);
+            //             c-=4;
+            //         }
+            //     }
+            // }
         }
         else{
             //为全局变量赋初值
