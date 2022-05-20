@@ -40,6 +40,7 @@ class TransHelper {
     void endFunc(void);
 
     // Arithmetic
+    Temp allocNewTempI4(int);
     Temp genAdd(Temp, Temp);
     Temp genSub(Temp, Temp);
     Temp genMul(Temp, Temp);

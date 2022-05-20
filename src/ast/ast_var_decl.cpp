@@ -71,14 +71,6 @@ VarDecl::VarDecl(std::string n, Expr *i, Location *l) {
     lian=NULL;
 }
 
-VarDecl::VarDecl(std::string n, Type *t, int d, Location *l) {
-
-    setBasicInfo(VAR_DECL, l);
-
-    name = n;
-    type = t;
-    init = NULL;
-}
 
 VarDecl::VarDecl(std::string n, Type *t, Location *l) {
 
@@ -87,6 +79,66 @@ VarDecl::VarDecl(std::string n, Type *t, Location *l) {
     name = n;
     type = t;
     init = NULL;
+    
+    lian=NULL;
+}
+
+VarDecl::VarDecl(std::string n, Type *t, DimList * ld,DimList *rd, DouList *li,Location *l) {
+
+    setBasicInfo(VAR_DECL, l);
+
+    name = n;
+    type = t;
+    init = NULL;
+    ldim=ld;
+    rdim=rd;
+    lian=li;
+    if(lian!=NULL){
+        for(ast::DouList::iterator it=lian->begin();it!=lian->end();it++){
+            (*it)->type=t;
+        }
+    }
+}
+
+VarDecl::VarDecl(std::string n, Type *t, DimList * ld, DouList *li,Location *l) {
+
+    setBasicInfo(VAR_DECL, l);
+
+    name = n;
+    type = t;
+    init = NULL;
+    ldim=ld;
+    rdim=NULL;
+    lian=li;
+    if(lian!=NULL){
+        for(ast::DouList::iterator it=lian->begin();it!=lian->end();it++){
+            (*it)->type=t;
+        }
+    }
+}
+
+VarDecl::VarDecl(std::string n,DimList *ld,  DimList * rd, Location *l) {
+
+    setBasicInfo(VAR_DECL, l);
+
+    name = n;
+    type = NULL;
+    init = NULL;
+    ldim=ld;
+    rdim=rd;
+    lian=NULL;
+}
+
+
+VarDecl::VarDecl(std::string n,DimList *ld,  Location *l) {
+
+    setBasicInfo(VAR_DECL, l);
+
+    name = n;
+    type = NULL;
+    init = NULL;
+    ldim=ld;
+    rdim=NULL;
     lian=NULL;
 }
 

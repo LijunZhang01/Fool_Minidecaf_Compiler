@@ -126,13 +126,29 @@ void RiscvDesc::emitPieces(scope::GlobalScope *gscope, Piece *ps,
         for(auto item=gscope->begin();item!=gscope->end();item++)
         {
             if((*item)->isVariable()){
-                os << "          " << std::left << std::setw(30) << ".global "<<(*item)->getName();
-    
-                os << std::endl;
-                os<<(*item)->getName()<<":";
-                os << std::endl;
-                os << "          " << std::left << std::setw(30) << ".word "<<(dynamic_cast<mind::symb::Variable *>(*item))->getGlobalInit();
-                os << std::endl;
+                if((*item)->getType()->isArrayType()){
+                    os << "          " << std::left << std::setw(30) << ".global "<<(*item)->getName();
+                    os << std::endl;
+                    os<<(*item)->getName()<<":";
+            
+                    auto itt=dynamic_cast<mind::symb::Variable *>(*item);
+                    
+                    for(auto it=itt->rdim->begin();it!=itt->rdim->end();it++){
+                        os << "          " << std::left << std::setw(30) << ".word "<<(*it);
+                        os << std::endl;
+                    }
+                    
+                    
+                }
+                else{
+                    os << "          " << std::left << std::setw(30) << ".global "<<(*item)->getName();
+                    os << std::endl;
+                    os<<(*item)->getName()<<":";
+                    os << std::endl;
+                    os << "          " << std::left << std::setw(30) << ".word "<<(dynamic_cast<mind::symb::Variable *>(*item))->getGlobalInit();
+                    os << std::endl;
+                }
+                
             }
         }
             
@@ -249,12 +265,22 @@ RiscvInstr *RiscvDesc::prepareSingleChain(BasicBlock *b, FlowGraph *g) {
  * SIDE-EFFECT:
  *   modifies the "_tail" field
  */
+void RiscvDesc::emitAllocTac(Tac *t) {
+    if (!t->LiveOut->contains(t->op0.var))
+        return;
+    int r0 = getRegForWrite(t->op0.var, 0, 0, t->LiveOut);
+    addInstr(RiscvInstr::ADDI, _reg[RiscvReg::SP], _reg[RiscvReg::SP], NULL, -t->op1.size, EMPTY_STR, NULL);
+    addInstr(RiscvInstr::MOVE, _reg[r0], _reg[RiscvReg::SP], NULL, 0, EMPTY_STR, NULL);
+}
 void RiscvDesc::emitTac(Tac *t) {
     std::ostringstream oss;
     t->dump(oss);
     addInstr(RiscvInstr::COMMENT, NULL, NULL, NULL, 0, EMPTY_STR, oss.str().c_str() + 4);
 
     switch (t->op_code) {
+    case Tac::ALLOC:
+        emitAllocTac(t);
+        break;
     case Tac::LOADSYMBOL:
         emitLaTac(RiscvInstr::LA,t);
         break;

@@ -185,7 +185,23 @@ void SemPass1::visit(ast::VarDecl *vdecl) {
     Type *t = NULL;
 
     vdecl->type->accept(this);
+    
+
+    if(vdecl->ldim != NULL) {
+        int length = 1;
+        for(int d : *(vdecl->ldim)){
+            length *= d;
+        }
+        if(length == 0){
+            issue(vdecl->getLocation(), new ZeroLengthedArrayError());
+            return ;
+        }
+        int d=vdecl->ldim->length();
+        vdecl->type->ATTR(type) = new ArrayType(vdecl->type->ATTR(type), length,d);
+    }
+
     t = vdecl->type->ATTR(type);
+    
 
     // TODO: Add a new symbol to a scope
     // 1. Create a new `Variable` symbol
@@ -194,7 +210,7 @@ void SemPass1::visit(ast::VarDecl *vdecl) {
     // 3. Declare the symbol in `scopes`
     // 4. Special processing for global variables
     // 5. Tag the symbol to `vdecl->ATTR(sym)`
-    Variable *v=new Variable(vdecl->name, t, vdecl->getLocation());
+    Variable *v=new Variable(vdecl->name, t, vdecl->ldim,vdecl->rdim,vdecl->getLocation());
     vdecl->ATTR(sym) = v;
     Symbol *sym = scopes->lookup(vdecl->name, vdecl->getLocation(), 0);
     if(sym != NULL)
@@ -208,7 +224,7 @@ void SemPass1::visit(ast::VarDecl *vdecl) {
     // }
     
     if(vdecl->lian!=NULL)
-    {    for(ast::DouList::iterator it=vdecl->lian->begin();
+    {   for(ast::DouList::iterator it=vdecl->lian->begin();
         it!=vdecl->lian->end();++it){
             (*it)->accept(this);
         }

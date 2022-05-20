@@ -78,9 +78,15 @@ class Variable : public Symbol {
     // init value for global variable
     int global_init;
 
+    
+    
+
   public:
     // Constructor
+    ast::DimList *rdim;
+    ast::DimList *dim;
     Variable(std::string n, type::Type *t, Location *l);
+    Variable(std::string n, type::Type *t, ast::DimList *dim,ast::DimList *rdim, Location *l);
     // Sets the parameter flag
     void setParameter(void);
     // Tests whether it is a parameter
@@ -99,6 +105,7 @@ class Variable : public Symbol {
     virtual void dump(std::ostream &os);
     // Attaches a temporary variable object to this symbol
     void attachTemp(tac::Temp);
+    ast::DimList * getDimList(void);
     // Gets the attached register object
     tac::Temp getTemp(void);
 };

@@ -71,6 +71,7 @@ class ASTNode {
         FOD,
         VArDecl_1,
         VArDecl_2,
+        INDEX_EXPR
     } NodeType;
 
   protected:
@@ -184,13 +185,19 @@ class Program : public ASTNode {
  */
 class VarDecl : public Statement {
   public:
-    VarDecl(std::string name, Location *l);
-    VarDecl(std::string name, Type *type, int dim, Location *l);
+    
+    
+
     VarDecl(std::string name, Type *type,  Location *l);
+    VarDecl(std::string name, Location *l);
     VarDecl(std::string name, Type *type, DouList *lian,Location *l);
     VarDecl(std::string name, Type *type, Expr *init, DouList *lian,Location *l);
-
     VarDecl(std::string name, Expr *init, Location *l);
+
+    VarDecl(std::string name, Type *type, DimList *ldim,DimList *rdim, DouList *lian,Location *l);
+    VarDecl(std::string name, Type *type,DimList *ldim,DouList *lian,Location *l);
+    VarDecl(std::string name, DimList *ldim,DimList *rdim,Location *l);
+    VarDecl(std::string name,DimList *ldim,Location *l);
     virtual void accept(Visitor *);
     virtual void dumpTo(std::ostream &);
 
@@ -200,6 +207,8 @@ class VarDecl : public Statement {
     Expr *init;
     DouList *lian;
     symb::Variable *ATTR(sym); // for semantic analysis
+    DimList *ldim;
+    DimList *rdim;
 };
 
 //大胆的尝试
@@ -449,11 +458,29 @@ class ContStmt : public Statement {
  * SERIALIZED FORM:
  *   (varref VAR_NAME OBJECT_EXPR)
  *   (varref VAR_NAME ())
+ * 
+ 
  */
+
+
+class IndexExpr : public Expr {
+  public:
+    IndexExpr(Expr *, ExprList *, Location *l);
+
+    virtual void accept(Visitor *);
+    virtual void dumpTo(std::ostream &);
+
+    ExprList *expr_list;
+    DimList *ATTR(dim);
+    DimList *ATTR(dim1);
+};
+
 class VarRef : public Lvalue {
   public:
     //	  VarRef (Expr* object, SID var_name,Location* l);
     VarRef(std::string var_name, Location *l);
+
+    VarRef(std::string var_name, IndexExpr *ldim,Location *l);
 
     virtual void accept(Visitor *);
     virtual void dumpTo(std::ostream &);
@@ -461,7 +488,7 @@ class VarRef : public Lvalue {
   public:
     Expr *owner; // only to pass compilation, not used
     std::string var;
-
+    IndexExpr *ldim;
     symb::Variable *ATTR(sym); // for tac generation
 };
 

@@ -94,10 +94,11 @@ class ArrayType : public Type {
     // the element type
     Type *element_type;
     int length;
+    int dim;
 
   public:
     // Constructor
-    ArrayType(Type *, int length);
+    ArrayType(Type *, int length,int d);
     // Gets the element type (a.k.a. "the base type of an array")
     Type *getElementType(void);
     // Gets the array length
@@ -106,6 +107,7 @@ class ArrayType : public Type {
     virtual bool isArrayType(void);
     // Get the size of this type
     virtual int getSize();
+    virtual int getDim();
     // Tests whether it is compatible with the given type
     virtual bool compatible(Type *);
     // Tests whether it is equal to the given type

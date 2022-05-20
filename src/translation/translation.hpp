@@ -37,7 +37,7 @@ class Translation : public ast::Visitor {
     virtual void visit(ast::NeqExpr *);
     virtual void visit(ast::OrExpr *);
     virtual void visit(ast::AndExpr *);
-    
+    virtual void visit(ast::IndexExpr *);
 
     //step 3
     virtual void visit(ast::AddExpr *);

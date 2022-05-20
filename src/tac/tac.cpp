@@ -64,6 +64,15 @@ Tac *Tac::Memo(const char *memo) {
  * RETURNS:
  *   an Add tac
  */
+Tac *Tac::Alloc(Temp dest, int num) {
+    REQUIRE_I4(dest);
+
+    Tac *t = allocateNewTac(Tac::ALLOC);
+    t->op0.var = dest;
+    t->op1.size = num;
+    
+    return t;
+}
 Tac *Tac::Add(Temp dest, Temp op1, Temp op2) {
     REQUIRE_I4(dest);
     REQUIRE_I4(op1);
@@ -675,6 +684,9 @@ std::ostream &mind::operator<<(std::ostream &os, Functy f) {
  */
 void Tac::dump(std::ostream &os) {
     switch (op_code) {
+    case ALLOC:
+        os << "    " << op0.var << " = ALLOC " << op1.size;
+        break;
     case LOADSYMBOL:
         os << "    " << op0.var << " <- LOAD_SYMBOL " << op1.name;
         break;

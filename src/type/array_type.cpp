@@ -15,11 +15,12 @@ using namespace mind::type;
  *   bt    - the base type (i.e. the element type)
  *   len   - the length or the array
  */
-ArrayType::ArrayType(Type *bt, int len) {
+ArrayType::ArrayType(Type *bt, int len,int d) {
     mind_assert(NULL != bt && !bt->isFuncType() && !bt->equal(BaseType::Error));
 
     element_type = bt;
     length = len;
+    dim=d;
 }
 
 /* Gets the element type.
@@ -30,7 +31,7 @@ ArrayType::ArrayType(Type *bt, int len) {
 Type *ArrayType::getElementType(void) { return element_type; }
 
 int ArrayType::getLength(void) { return length; }
-
+int ArrayType::getDim(void) { return dim; }
 /* Tests whether it is an ArrayType.
  *
  * RETURNS:

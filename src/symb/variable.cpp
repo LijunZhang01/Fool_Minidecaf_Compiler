@@ -32,10 +32,25 @@ Variable::Variable(std::string n, Type *t, Location *l) {
     is_parameter = false;
     global_init = 0;
     attached = NULL;
+    rdim=NULL;
+    mark = 0;
+}
+Variable::Variable(std::string n, Type *t, ast::DimList *dim, ast::DimList *rd, Location *l) {
+    mind_assert(NULL != t);
+
+    name = n;
+    type = t;
+    loc = l;
+    order = -1;
+
+    is_parameter = false;
+    global_init = 0;
+    attached = NULL;
+    rdim=rd;
+    this->dim = dim;
 
     mark = 0;
 }
-
 /* Sets the parameter flag (i.e. it is a parameter).
  *
  */
@@ -102,6 +117,10 @@ void Variable::dump(std::ostream &os) {
  * PARAMETERS:
  *   v     - the register object
  */
+
+
+ast::DimList *Variable::getDimList(void) { return dim; }
+
 void Variable::attachTemp(tac::Temp v) {
     mind_assert(NULL != v && NULL == attached);
 

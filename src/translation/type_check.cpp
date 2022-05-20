@@ -72,6 +72,7 @@ class SemPass2 : public ast::Visitor {
     virtual void visit(ast::IfExpr *s);
 
     virtual void visit(ast::CallExpr *s);
+    virtual void visit(ast::IndexExpr *s);
 };
 
 // recording the current return type
@@ -343,6 +344,27 @@ void SemPass2::visit(ast::LvalueExpr *e) {
  * PARAMETERS:
  *   e     - the ast::VarRef node
  */
+
+void SemPass2::visit(ast::IndexExpr *e) {
+    e->ATTR(dim1)=new ast::DimList();
+    for(auto c : *(e->expr_list)){
+        c->accept(this);
+        e->ATTR(dim1)->append(c->ATTR(value));
+    }
+        
+}
+void SemPass2::visit(ast::AssignExpr *s) {
+   s->left->accept(this);
+    s->e->accept(this);
+
+    if ((s->left->ATTR(lv_kind)!=ast::Lvalue::ARRAY_ELE)&&!isErrorType(s->left->ATTR(type)) &&
+        !s->e->ATTR(type)->compatible(s->left->ATTR(type))) {
+        issue(s->getLocation(),
+              new IncompatibleError(s->left->ATTR(type), s->e->ATTR(type)));
+    }
+
+    s->ATTR(type) = s->left->ATTR(type);
+}
 void SemPass2::visit(ast::VarRef *ref) {
     // CASE I: owner is NULL ==> referencing a local var or a member var?
     Symbol *v = scopes->lookup(ref->var, ref->getLocation());
@@ -355,12 +377,34 @@ void SemPass2::visit(ast::VarRef *ref) {
         goto issue_error_type;
 
     } else {
-        ref->ATTR(type) = v->getType();
         ref->ATTR(sym) = (Variable *)v;
+        if(ref->ldim==NULL){
+            ref->ATTR(type) = v->getType();
 
-        if (((Variable *)v)->isLocalVar()) {
-            ref->ATTR(lv_kind) = ast::Lvalue::SIMPLE_VAR;
+            if (((Variable *)v)->isLocalVar()) {
+                ref->ATTR(lv_kind) = ast::Lvalue::SIMPLE_VAR;
+            }
         }
+        else{
+            ref->ldim->accept(this);
+            if(ref->ldim->ATTR(dim1)->length()!=((ArrayType *)v->getType())->getDim())
+                goto issue_error_type;
+            for(auto it=ref->ldim->ATTR(dim1)->begin(),mt=((Variable *)v)->dim->begin();it!=ref->ldim->ATTR(dim1)->end();it++){
+                if((*it)>=(*mt)) goto issue_error_type;
+                mt++;
+            }
+            ref->ATTR(type) = ((ArrayType *)v->getType())->getElementType();
+            ref->ldim->ATTR(dim) = ref->ATTR(sym)->getDimList();
+            ref->ATTR(lv_kind) = ast::Lvalue::ARRAY_ELE;
+            
+
+        }
+        // ref->ATTR(type) = v->getType();
+        // ref->ATTR(sym) = (Variable *)v;
+
+        // if (((Variable *)v)->isLocalVar()) {
+        //     ref->ATTR(lv_kind) = ast::Lvalue::SIMPLE_VAR;
+        // }
     }
 
     return;
@@ -420,6 +464,7 @@ issue_error_type:
 void SemPass2::visit(ast::VarDecl *decl) {
     if (decl->init)
         decl->init->accept(this);
+
     if(decl->lian!=NULL){
         for(ast::DouList::iterator it=decl->lian->begin();
         it!=decl->lian->end();++it){
@@ -435,18 +480,7 @@ void SemPass2::visit(ast::VarDecl *decl) {
  * PARAMETERS:
  *   e     - the ast::AssignStmt node
  */
-void SemPass2::visit(ast::AssignExpr *s) {
-    s->left->accept(this);
-    s->e->accept(this);
 
-    if (!isErrorType(s->left->ATTR(type)) &&
-        !s->e->ATTR(type)->compatible(s->left->ATTR(type))) {
-        issue(s->getLocation(),
-              new IncompatibleError(s->left->ATTR(type), s->e->ATTR(type)));
-    }
-
-    s->ATTR(type) = s->left->ATTR(type);
-}
 
 /* Visits an ast::ExprStmt node.
  *

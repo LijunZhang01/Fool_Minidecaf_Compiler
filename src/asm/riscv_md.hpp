@@ -173,7 +173,7 @@ class RiscvDesc : public MachineDesc {
     void emitLoadImm4Tac(tac::Tac *);
     // translates a Unary TAC into assembly instructions
     void emitUnaryTac(RiscvInstr::OpCode, tac::Tac *);
-
+    void emitAllocTac(tac::Tac *t);
     void emitCallTac(RiscvInstr::OpCode, tac::Tac *);
     void emitPushTac(tac::Tac *);
     void emitLaTac(RiscvInstr::OpCode,tac::Tac *t);

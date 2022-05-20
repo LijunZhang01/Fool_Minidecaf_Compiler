@@ -99,6 +99,8 @@ void scan_end();
 %nterm<mind::ast::Expr*> Expr LvalueExpr FExpr
 %nterm<mind::ast::VarRef*> VarRef
 %nterm<mind::ast::ExprList*> ExprList
+%nterm<mind::ast::DimList*> IndexExpr3 IndexExpr1
+%nterm<mind::ast::IndexExpr*> IndexExpr2
 
 /*   SUBSECTION 2.2: associativeness & precedences */
 
@@ -196,7 +198,44 @@ DeclStmt    : Type IDENTIFIER DouList SEMICOLON
                 { $$ = new ast::VarDecl($2, $1, $3,POS(@1)); }
             | Type IDENTIFIER ASSIGN Expr DouList SEMICOLON 
                 { $$ = new ast::VarDecl($2, $1, $4, $5,POS(@1)); }
+            | Type IDENTIFIER IndexExpr3 DouList SEMICOLON
+                { $$ = new ast::VarDecl($2, $1, $3,$4, POS(@1)); }
+            | Type IDENTIFIER IndexExpr3 ASSIGN IndexExpr1 DouList SEMICOLON 
+                { $$ = new ast::VarDecl($2, $1, $3,$5, $6,POS(@1)); }
             ;
+
+IndexExpr3   : LBRACK ICONST RBRACK IndexExpr3 
+                { $$ = $4;
+                  $$->append_my($2);
+                }
+            | LBRACK ICONST RBRACK
+                { $$ = new ast::DimList();
+                  $$->append_my($2);
+                }
+            ;
+
+
+IndexExpr1   : /* EMPTY */
+                {$$ = new ast::DimList();} 
+            | COMMA ICONST IndexExpr1
+                { $$ = $3;
+                  $$->append($2);
+                }
+            | COMMA IndexExpr1
+                { $$ = $2;
+                }
+            | ICONST IndexExpr1
+                { $$ = $2;
+                  $$->append($1);
+                }
+            | LBRACE IndexExpr1 RBRACE IndexExpr1 
+                { 
+                  $$ = $4;
+                  $$->concate($2);
+                }
+            ;
+
+
 
 DouList     : /* EMPTY */
                 {$$ = new ast::DouList();} 
@@ -208,10 +247,26 @@ DouList     : /* EMPTY */
                 { $5->append(new ast::VarDecl($2, $4,POS(@1)));
                   $$=$5;
                 }
+            | COMMA IDENTIFIER IndexExpr3 DouList
+                { $4->append(new ast::VarDecl($2, $3,POS(@1)));
+                  $$=$4;
+                }
+            | COMMA IDENTIFIER IndexExpr3 ASSIGN IndexExpr1 DouList
+                { $6->append(new ast::VarDecl($2, $3,$5,POS(@1)));
+                  $$=$6;
+                }
             ;
 VarRef      : IDENTIFIER
                 { $$ = new ast::VarRef($1, POS(@1)); }
+            | IDENTIFIER IndexExpr2
+                { $$ = new ast::VarRef($1, $2, POS(@1)); }
             ;
+
+
+IndexExpr2   : LBRACK Expr RBRACK IndexExpr2
+                { $$ = new ast::IndexExpr($2, $4->expr_list, POS(@1)); }
+            | LBRACK Expr RBRACK
+                { $$ = new ast::IndexExpr($2, new ast::ExprList(), POS(@1)); }
 
 LvalueExpr  : VarRef
                 { $$ = new ast::LvalueExpr($1, POS(@1)); }
@@ -271,6 +326,8 @@ Expr        : ICONST
                 { $$ = new ast::CallExpr($1, $3, POS(@1)); }         
             | LPAREN Expr RPAREN
                 { $$ = $2; }
+            | Expr QUESTION Expr COLON Expr %prec QUESTION
+                { $$ = new ast::IfExpr($1, $3, $5, POS(@1)); }
             | LvalueExpr
                 { $$ = $1; }
             
@@ -308,8 +365,7 @@ Expr        : ICONST
                 { $$ = new ast::AndExpr($1,$3, POS(@2)); }
             | Expr OR Expr %prec OR
                 { $$ = new ast::OrExpr($1,$3, POS(@2)); }
-            | Expr QUESTION Expr COLON Expr %prec QUESTION
-                { $$ = new ast::IfExpr($1, $3, $5, POS(@1)); }
+            
             
             ;
 

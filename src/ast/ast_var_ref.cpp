@@ -26,9 +26,19 @@ VarRef::VarRef(std::string n, Location *l) {
     setBasicInfo(VAR_REF, l);
 
     var = n;
-
+    ldim=NULL;
     ATTR(sym) = NULL;
 }
+
+VarRef::VarRef(std::string n, IndexExpr *ld,Location *l) {
+
+    setBasicInfo(VAR_REF, l);
+
+    var = n;
+    ldim=ld;
+    ATTR(sym) = NULL;
+}
+
 
 /* Visits the current node.
  *

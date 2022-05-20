@@ -37,6 +37,11 @@ void TransHelper::chainUp(Tac *t) {
     else
         tacs_tail = tacs_tail->next = t;
 }
+Temp TransHelper::allocNewTempI4(int size) {
+    Temp v = getNewTempI4();
+    chainUp(Tac::Alloc(v, size));
+    return v;
+}
 
 /******************** public methods *********************/
 

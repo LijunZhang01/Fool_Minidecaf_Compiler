@@ -97,7 +97,8 @@ struct Tac {
         CALL,
         LOADSYMBOL,
         LOAD,
-        STORE
+        STORE,
+        ALLOC
     } Kind;
 
     // Operand type
@@ -153,7 +154,7 @@ struct Tac {
     static Tac *LoadSymbol(Temp dest, std::string label);
     static Tac *Load(Temp dest, Temp src, int offset);
     static Tac *Store(Temp src, Temp base, int offset);
-
+    static Tac *Alloc(Temp dest, int num);
 
     // dumps a single tac node to some output stream
     void dump(std::ostream &);
