@@ -27,6 +27,7 @@ VarDecl::VarDecl(std::string n, Type *t, DouList *li,Location *l) {
     type = t;
     //quanju = t;
     init = NULL;
+    const1=0;
     lian=li;
     if(lian!=NULL){
         for(ast::DouList::iterator it=lian->begin();
@@ -34,6 +35,7 @@ VarDecl::VarDecl(std::string n, Type *t, DouList *li,Location *l) {
             (*it)->type=t;
         }
     }
+    ldim=NULL;
 }
 
 VarDecl::VarDecl(std::string n, Type *t, Expr *i, DouList *li,Location *l) {
@@ -42,6 +44,7 @@ VarDecl::VarDecl(std::string n, Type *t, Expr *i, DouList *li,Location *l) {
     name = n;
     type = t;
     //quanju=t;
+    const1=0;
     init = i;
     lian=li;
     if(lian!=NULL){
@@ -50,6 +53,7 @@ VarDecl::VarDecl(std::string n, Type *t, Expr *i, DouList *li,Location *l) {
             (*it)->type=t;
         }
     }
+    ldim=NULL;
 }
 
 VarDecl::VarDecl(std::string n, Location *l) {
@@ -60,6 +64,7 @@ VarDecl::VarDecl(std::string n, Location *l) {
     type = NULL;
     init = NULL;
     lian=NULL;
+    const1=0;
 }
 
 VarDecl::VarDecl(std::string n, Expr *i, Location *l) {
@@ -69,6 +74,7 @@ VarDecl::VarDecl(std::string n, Expr *i, Location *l) {
     type = NULL;
     init = i;
     lian=NULL;
+    const1=0;
 }
 
 
@@ -81,9 +87,10 @@ VarDecl::VarDecl(std::string n, Type *t, Location *l) {
     init = NULL;
     
     lian=NULL;
+    const1=0;
 }
 
-VarDecl::VarDecl(std::string n, Type *t, DimList * ld,DimList *rd, DouList *li,Location *l) {
+VarDecl::VarDecl(std::string n, Type *t, IndexExpr * ld,DimList *rd, DouList *li,Location *l) {
 
     setBasicInfo(VAR_DECL, l);
 
@@ -93,6 +100,7 @@ VarDecl::VarDecl(std::string n, Type *t, DimList * ld,DimList *rd, DouList *li,L
     ldim=ld;
     rdim=rd;
     lian=li;
+    const1=0;
     if(lian!=NULL){
         for(ast::DouList::iterator it=lian->begin();it!=lian->end();it++){
             (*it)->type=t;
@@ -100,7 +108,7 @@ VarDecl::VarDecl(std::string n, Type *t, DimList * ld,DimList *rd, DouList *li,L
     }
 }
 
-VarDecl::VarDecl(std::string n, Type *t, DimList * ld, DouList *li,Location *l) {
+VarDecl::VarDecl(std::string n, Type *t, IndexExpr * ld, DouList *li,Location *l) {
 
     setBasicInfo(VAR_DECL, l);
 
@@ -110,6 +118,7 @@ VarDecl::VarDecl(std::string n, Type *t, DimList * ld, DouList *li,Location *l) 
     ldim=ld;
     rdim=NULL;
     lian=li;
+    const1=0;
     if(lian!=NULL){
         for(ast::DouList::iterator it=lian->begin();it!=lian->end();it++){
             (*it)->type=t;
@@ -117,7 +126,7 @@ VarDecl::VarDecl(std::string n, Type *t, DimList * ld, DouList *li,Location *l) 
     }
 }
 
-VarDecl::VarDecl(std::string n,DimList *ld,  DimList * rd, Location *l) {
+VarDecl::VarDecl(std::string n,IndexExpr *ld,  DimList * rd, Location *l) {
 
     setBasicInfo(VAR_DECL, l);
 
@@ -127,10 +136,11 @@ VarDecl::VarDecl(std::string n,DimList *ld,  DimList * rd, Location *l) {
     ldim=ld;
     rdim=rd;
     lian=NULL;
+    const1=0;
 }
 
 
-VarDecl::VarDecl(std::string n,DimList *ld,  Location *l) {
+VarDecl::VarDecl(std::string n,IndexExpr *ld,  Location *l) {
 
     setBasicInfo(VAR_DECL, l);
 
@@ -140,8 +150,46 @@ VarDecl::VarDecl(std::string n,DimList *ld,  Location *l) {
     ldim=ld;
     rdim=NULL;
     lian=NULL;
+    const1=0;
+}
+VarDecl::VarDecl(std::string const1,std::string n, Type *t, Expr *i, DouList *li,Location *l) {
+
+    setBasicInfo(VAR_DECL, l);
+
+    name = n;
+    type = t;
+    //quanju=t;
+    this->const1=1;
+    init = i;
+    lian=li;
+    if(lian!=NULL){
+        for(ast::DouList::iterator it=lian->begin();
+        it!=lian->end();++it){
+            (*it)->type=t;
+            (*it)->const1=1;
+        }
+    }
 }
 
+
+VarDecl::VarDecl(std::string const1,std::string n, Type *t, IndexExpr * ld,DimList *rd, DouList *li,Location *l) {
+
+    setBasicInfo(VAR_DECL, l);
+
+    name = n;
+    type = t;
+    init = NULL;
+    ldim=ld;
+    rdim=rd;
+    lian=li;
+    this->const1=1;
+    if(lian!=NULL){
+        for(ast::DouList::iterator it=lian->begin();it!=lian->end();it++){
+            (*it)->type=t;
+            (*it)->const1=1;
+        }
+    }
+}
 /* Visits the current node.
  *
  * PARAMETERS:

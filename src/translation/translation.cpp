@@ -487,22 +487,29 @@ void Translation::visit(ast::LvalueExpr *e) {
     switch (e->lvalue->getKind()) {
         case ast::ASTNode::VAR_REF:{
             ast::VarRef *ref = (ast::VarRef *)e->lvalue;
+            // if(ref->ATTR(sym)->iscon){
+            //     e->ATTR(val) = tr->genLoad(temp, 0);
+            // }
             if(ref->ATTR(sym)->isGlobalVar()){
                 Temp temp = tr->genLoadSymbol(ref->ATTR(sym)->getName());
                 if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAY_ELE)
                     temp = tr->genAdd(temp, ref->ldim->ATTR(val));
                 e->ATTR(val) = tr->genLoad(temp, 0);
-                scope::Scope *scop_temp=ref->ATTR(sym)->getScope();
-                int jiji=0;
-                for(auto item=scop_temp->begin();item!=scop_temp->end();item++){
-                    if((*item)->getName()==ref->var)
-                    {
-                        e->ATTR(value)=(dynamic_cast<mind::symb::Variable *>(*item))->getGlobalInit();
-                        jiji=1;
-                    }
+                if(ref->ATTR(sym)->iscon){
+                    e->ATTR(value) = ref->ATTR(sym)->con_val;
                 }
-                if(jiji==0) mind_assert(false);
-                
+                else{
+                    scope::Scope *scop_temp=ref->ATTR(sym)->getScope();
+                    int jiji=0;
+                    for(auto item=scop_temp->begin();item!=scop_temp->end();item++){
+                        if((*item)->getName()==ref->var)
+                        {
+                            e->ATTR(value)=(dynamic_cast<mind::symb::Variable *>(*item))->getGlobalInit();
+                            jiji=1;
+                        }
+                    }
+                    if(jiji==0) mind_assert(false);
+                }
             }
             else {
                 if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAY_ELE){
@@ -575,6 +582,28 @@ void Translation::visit(ast::VarDecl *decl) {
     // TODO
     //具体步骤就是先为这个变量的左值分配一个Temp，若在变量的定义中发现他拥有赋值的操作，那就应该生成Assign语句的
     //三元表达式
+    if(decl->const1){
+        if(decl->ATTR(sym)->isGlobalVar()){
+            if(decl->type->ATTR(type)->isArrayType()){
+
+            }
+            else{
+                decl->ATTR(sym)->con_val=decl->init->ATTR(value);
+            }
+        }
+        else{
+            if(decl->type->ATTR(type)->isArrayType()){
+
+            }
+            else{
+                decl->ATTR(sym)->con_val=decl->init->ATTR(value);
+            }
+        }
+        
+    }
+    else{
+
+    }
     if(decl->ATTR(sym)->isGlobalVar()){
         if(decl->type->ATTR(type)->isArrayType()){
             // if(decl->ATTR(sym)->rdim==NULL){
@@ -606,6 +635,7 @@ void Translation::visit(ast::VarDecl *decl) {
             else{
                 //decl->ATTR(sym)->setGlobalInit(0);
                 decl->init->accept(this);
+                
                 if(decl->init->getKind() == ast::ASTNode::INT_CONST)
                 {
                     decl->ATTR(sym)->setGlobalInit(((ast::IntConst *)(decl->init))->value);

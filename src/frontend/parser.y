@@ -53,6 +53,7 @@ void scan_end();
    BOOL "bool"
    INT  "int"
    RETURN "return"
+   CONST "const"
    IF "if"
    ELSE  "else"
    DO "do"
@@ -95,13 +96,13 @@ void scan_end();
 %nterm<mind::ast::Program* > Program FoDList
 %nterm<mind::ast::FuncDefn* > FuncDefn
 %nterm<mind::ast::Type*> Type
-%nterm<mind::ast::Statement*> Stmt  ReturnStmt ExprStmt IfStmt  CompStmt WhileStmt DeclStmt DeclStmt1 DeclStmt2 DoWhileStmt ForStmt
+%nterm<mind::ast::Statement*> Stmt  ReturnStmt ExprStmt IfStmt  CompStmt WhileStmt DeclStmt DeclStmt_tuo DeclStmt2 DoWhileStmt ForStmt
 %nterm<mind::ast::Expr*> Expr LvalueExpr FExpr
 %nterm<mind::ast::VarRef*> VarRef
 %nterm<mind::ast::ExprList*> ExprList
 %nterm<mind::ast::DimList*> IndexExpr3 IndexExpr1
 %nterm<mind::ast::IndexExpr*> IndexExpr2
-
+%nterm<mind::ast::InitVal*> InitVal InitVals
 /*   SUBSECTION 2.2: associativeness & precedences */
 
 %left     ASSIGN
@@ -198,10 +199,14 @@ DeclStmt    : Type IDENTIFIER DouList SEMICOLON
                 { $$ = new ast::VarDecl($2, $1, $3,POS(@1)); }
             | Type IDENTIFIER ASSIGN Expr DouList SEMICOLON 
                 { $$ = new ast::VarDecl($2, $1, $4, $5,POS(@1)); }
-            | Type IDENTIFIER IndexExpr3 DouList SEMICOLON
+            | Type IDENTIFIER IndexExpr2 DouList SEMICOLON
                 { $$ = new ast::VarDecl($2, $1, $3,$4, POS(@1)); }
-            | Type IDENTIFIER IndexExpr3 ASSIGN IndexExpr1 DouList SEMICOLON 
+            | Type IDENTIFIER IndexExpr2 ASSIGN IndexExpr1 DouList SEMICOLON 
                 { $$ = new ast::VarDecl($2, $1, $3,$5, $6,POS(@1)); }
+            | CONST Type IDENTIFIER ASSIGN Expr DouList SEMICOLON 
+                { $$ = new ast::VarDecl(std::string("const"),$3, $2, $5, $6,POS(@1)); }
+            | CONST Type IDENTIFIER IndexExpr2 ASSIGN IndexExpr1 DouList SEMICOLON 
+                { $$ = new ast::VarDecl(std::string("const"),$3, $2, $4,$6, $7,POS(@1)); }
             ;
 
 IndexExpr3   : LBRACK ICONST RBRACK IndexExpr3 
@@ -235,7 +240,16 @@ IndexExpr1   : /* EMPTY */
                 }
             ;
 
+InitVal:
+	Expr								{$$ = new InitVal_EXP(POS(@1), InitVal_EXP); $$->son.push_back($1);}
+	|LBRACE RBRACE						{$$ = new InitVal_NULL(POS(@1), InitVal_NULL);}
+	|LBRACE InitVals RBRACE				{$$ = new Initval_(POS(@1), InitVal_); $$->son.push_back($2);}
+;
 
+InitVals:
+	InitVal							{$$ = new Initvals_(POS(@1)); $$->son.push_back($1);}
+	|InitVals COMMA InitVal			{$1->son.push_back($3);}
+;
 
 DouList     : /* EMPTY */
                 {$$ = new ast::DouList();} 
@@ -247,11 +261,11 @@ DouList     : /* EMPTY */
                 { $5->append(new ast::VarDecl($2, $4,POS(@1)));
                   $$=$5;
                 }
-            | COMMA IDENTIFIER IndexExpr3 DouList
+            | COMMA IDENTIFIER IndexExpr2 DouList
                 { $4->append(new ast::VarDecl($2, $3,POS(@1)));
                   $$=$4;
                 }
-            | COMMA IDENTIFIER IndexExpr3 ASSIGN IndexExpr1 DouList
+            | COMMA IDENTIFIER IndexExpr2 ASSIGN IndexExpr1 DouList
                 { $6->append(new ast::VarDecl($2, $3,$5,POS(@1)));
                   $$=$6;
                 }

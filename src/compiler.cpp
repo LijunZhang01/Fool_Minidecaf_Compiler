@@ -52,18 +52,22 @@ MindCompiler::MindCompiler() {
  *   if any errors occur, the function will not return.
  */
 void MindCompiler::compile(const char *input, std::ostream &result) {
+    
     // syntatical analysis
     ast::Program *tree = parseFile(input);
     // Checkpoint 1: if we get a bad AST, terminate the compilation.
+    
     err::checkPoint();
-
+    
     if (Option::getLevel() == Option::PARSER) {
         result << tree << std::endl;
         result.flush();
         return;
     }
+    
     // semantical analysis
     buildSymbols(tree);
+    // std::cout<<")))))";
     // TO STUDENTS: if you want to have a look at the symbol tables,
     //              enable the following 2 lines
     //result << tree->ATTR(gscope) << std::endl;

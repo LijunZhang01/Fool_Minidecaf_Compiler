@@ -356,7 +356,10 @@ void SemPass2::visit(ast::IndexExpr *e) {
 void SemPass2::visit(ast::AssignExpr *s) {
    s->left->accept(this);
     s->e->accept(this);
-
+     if(((ast::VarRef *)s->left)->ATTR(sym)->iscon){
+         issue(s->getLocation(),
+              new IncompatibleError(s->left->ATTR(type), s->e->ATTR(type)));
+     }
     if ((s->left->ATTR(lv_kind)!=ast::Lvalue::ARRAY_ELE)&&!isErrorType(s->left->ATTR(type)) &&
         !s->e->ATTR(type)->compatible(s->left->ATTR(type))) {
         issue(s->getLocation(),
@@ -378,6 +381,7 @@ void SemPass2::visit(ast::VarRef *ref) {
 
     } else {
         ref->ATTR(sym) = (Variable *)v;
+        
         if(ref->ldim==NULL){
             ref->ATTR(type) = v->getType();
 
@@ -464,7 +468,8 @@ issue_error_type:
 void SemPass2::visit(ast::VarDecl *decl) {
     if (decl->init)
         decl->init->accept(this);
-
+    //如果他是常量
+    
     if(decl->lian!=NULL){
         for(ast::DouList::iterator it=decl->lian->begin();
         it!=decl->lian->end();++it){

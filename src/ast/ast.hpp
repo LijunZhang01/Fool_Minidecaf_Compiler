@@ -12,6 +12,7 @@
 #include "define.hpp"
 #include <iostream>
 #include <string>
+#include <vector>
 
 // the prefix of an ast attribution
 #define ATTR(x) ast_attr_##x##_
@@ -183,6 +184,18 @@ class Program : public ASTNode {
  * SERIALIZED FORM:
  *   (var NAME TYPE)
  */
+
+class IndexExpr : public Expr {
+  public:
+    IndexExpr(Expr *, ExprList *, Location *l);
+
+    virtual void accept(Visitor *);
+    virtual void dumpTo(std::ostream &);
+
+    ExprList *expr_list;
+    DimList *ATTR(dim);
+    DimList *ATTR(dim1);
+};
 class VarDecl : public Statement {
   public:
     
@@ -194,10 +207,13 @@ class VarDecl : public Statement {
     VarDecl(std::string name, Type *type, Expr *init, DouList *lian,Location *l);
     VarDecl(std::string name, Expr *init, Location *l);
 
-    VarDecl(std::string name, Type *type, DimList *ldim,DimList *rdim, DouList *lian,Location *l);
-    VarDecl(std::string name, Type *type,DimList *ldim,DouList *lian,Location *l);
-    VarDecl(std::string name, DimList *ldim,DimList *rdim,Location *l);
-    VarDecl(std::string name,DimList *ldim,Location *l);
+    VarDecl(std::string name, Type *type, IndexExpr *ldim,DimList *rdim, DouList *lian,Location *l);
+    VarDecl(std::string name, Type *type,IndexExpr *ldim,DouList *lian,Location *l);
+    VarDecl(std::string name, IndexExpr *ldim,DimList *rdim,Location *l);
+    VarDecl(std::string name,IndexExpr *ldim,Location *l);
+
+    VarDecl(std::string const1,std::string name, Type *type, Expr *init, DouList *lian,Location *l);
+    VarDecl(std::string const1,std::string name, Type *type, IndexExpr *ldim,DimList *rdim, DouList *lian,Location *l);
     virtual void accept(Visitor *);
     virtual void dumpTo(std::ostream &);
 
@@ -207,8 +223,9 @@ class VarDecl : public Statement {
     Expr *init;
     DouList *lian;
     symb::Variable *ATTR(sym); // for semantic analysis
-    DimList *ldim;
+    IndexExpr *ldim;
     DimList *rdim;
+    std::int16_t const1;
 };
 
 //大胆的尝试
@@ -463,17 +480,7 @@ class ContStmt : public Statement {
  */
 
 
-class IndexExpr : public Expr {
-  public:
-    IndexExpr(Expr *, ExprList *, Location *l);
 
-    virtual void accept(Visitor *);
-    virtual void dumpTo(std::ostream &);
-
-    ExprList *expr_list;
-    DimList *ATTR(dim);
-    DimList *ATTR(dim1);
-};
 
 class VarRef : public Lvalue {
   public:
@@ -490,6 +497,7 @@ class VarRef : public Lvalue {
     std::string var;
     IndexExpr *ldim;
     symb::Variable *ATTR(sym); // for tac generation
+    int m;
 };
 
 class PointerRef : public Lvalue {
@@ -858,6 +866,44 @@ class CallExpr : public Expr {
     ExprList *elist;
     symb::Function *ATTR(sym);
 };
+
+typedef enum{
+    InitVals_,InitVal_,InitVal_EXP,InitVal_NULL
+} GrammaType;
+
+class Initval{
+  public:
+    std::vector<Initval*> son;
+    int type;
+    virtual ~Initval(void) {}
+};
+class Initval_NULL:public Initval{
+  public:
+    Initval_NULL(Location *l,int ty){
+      type=ty;
+    };
+};
+class Initval_Exp:public Initval{
+  public:
+    Initval_Exp(Location *l,int ty){
+      type=ty;
+    };
+};
+class Initval_:public Initval{
+  public:
+    Initval_(Location *l,int ty){
+      type=ty;
+    };
+};
+class Initvals_:public Initval{
+  public:
+    Initvals_(Location *l,int ty){
+      type=ty;
+    };
+};
+
+
+
 extern bool print_decorated_ast;
 } // namespace ast
 } // namespace mind

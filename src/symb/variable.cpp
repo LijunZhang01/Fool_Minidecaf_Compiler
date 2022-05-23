@@ -7,6 +7,7 @@
 #include "config.hpp"
 #include "scope/scope.hpp"
 #include "symb/symbol.hpp"
+#include <iostream>
 
 using namespace mind;
 using namespace mind::symb;
@@ -34,8 +35,9 @@ Variable::Variable(std::string n, Type *t, Location *l) {
     attached = NULL;
     rdim=NULL;
     mark = 0;
+    con_val=0;
 }
-Variable::Variable(std::string n, Type *t, ast::DimList *dim, ast::DimList *rd, Location *l) {
+Variable::Variable(std::string n, Type *t, ast::DimList *dim, ast::DimList *rd, std::int16_t con, Location *l) {
     mind_assert(NULL != t);
 
     name = n;
@@ -48,8 +50,9 @@ Variable::Variable(std::string n, Type *t, ast::DimList *dim, ast::DimList *rd, 
     attached = NULL;
     rdim=rd;
     this->dim = dim;
-
+    iscon=con;
     mark = 0;
+    con_val=0;
 }
 /* Sets the parameter flag (i.e. it is a parameter).
  *

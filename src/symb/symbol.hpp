@@ -40,6 +40,7 @@ class Symbol {
 
   public:
     // auxiliary mark
+    std::int16_t iscon;
     int mark;
     // offset of this symbol
     int offset;
@@ -85,8 +86,9 @@ class Variable : public Symbol {
     // Constructor
     ast::DimList *rdim;
     ast::DimList *dim;
+    int con_val;
     Variable(std::string n, type::Type *t, Location *l);
-    Variable(std::string n, type::Type *t, ast::DimList *dim,ast::DimList *rdim, Location *l);
+    Variable(std::string n, type::Type *t, ast::DimList *dim,ast::DimList *rdim,std::int16_t con, Location *l);
     // Sets the parameter flag
     void setParameter(void);
     // Tests whether it is a parameter
