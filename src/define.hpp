@@ -17,7 +17,7 @@
 namespace mind {
 /* String ID */
 typedef unsigned long SID;
-
+// typedef util::List<mind::symb::Function *> FList;
 #ifndef MIND_LOCATION_DEFINED
 struct Location;
 #endif
@@ -103,6 +103,7 @@ typedef util::List<Statement *> StmtList;       // list of Statement
 typedef util::List<Expr *> ExprList;            // list of Expr
 typedef util::List<ASTNode *> FuncOrGlobalList; // list of Expr
 typedef util::List<VarDecl_2 *> DeclList ;
+
 
 } // namespace ast
 #endif

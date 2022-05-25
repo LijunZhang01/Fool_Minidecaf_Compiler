@@ -14,7 +14,7 @@
 // we assume the target machine is a 32-bit machine for simplicity.
 #define POINTER_SIZE 4
 #define WORD_SIZE 4
-
+// extern util::List<mind::symb::Function *> aa;
 namespace mind {
 
 class Translation : public ast::Visitor {

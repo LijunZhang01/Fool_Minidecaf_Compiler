@@ -20,6 +20,10 @@
 #include "scope/scope_stack.hpp"
 #include "symb/symbol.hpp"
 #include "type/type.hpp"
+#include "3rdparty/list.hpp"
+// #include<iostream>
+#include "list"
+// #include "define.hpp"
 
 using namespace mind;
 using namespace mind::scope;
@@ -27,8 +31,12 @@ using namespace mind::symb;
 using namespace mind::type;
 using namespace mind::err;
 
+std::list <mind::symb::Function *> mind::aa;
+// mind::util::List<mind::symb::Function *> aa=*(new std::list<mind::symb::Function *>());
 /* Pass 1 of the semantic analysis.
  */
+// std::list<Tac> mind::canlian;
+// std::list<symb::Function> mind::aa;
 class SemPass1 : public ast::Visitor {
   public:
     // visiting declarations
@@ -42,24 +50,24 @@ class SemPass1 : public ast::Visitor {
     virtual void visit(ast::VarDecl *);
     // visiting types
     virtual void visit(ast::IntType *);
-    virtual void visit(ast::IndexExpr *e);
-    virtual void visit(ast::AddExpr *e) ;
-    virtual void visit(ast::SubExpr *e) ;
-    virtual void visit(ast::MulExpr *e) ;
-    virtual void visit(ast::LesExpr *e) ;
-    virtual void visit(ast::GrtExpr *e) ;
-    virtual void visit(ast::LeqExpr *e) ;
-    virtual void visit(ast::GeqExpr *e) ;
-    virtual void visit(ast::EquExpr *e) ;
-    virtual void visit(ast::NeqExpr *e) ;
-    virtual void visit(ast::AndExpr *e) ;
-    virtual void visit(ast::OrExpr *e) ;
-    virtual void visit(ast::DivExpr *e) ;
-    virtual void visit(ast::ModExpr *e) ;
-    virtual void visit(ast::IntConst *e) ;
-    virtual void visit(ast::NegExpr *e) ;
-    virtual void visit(ast::NotExpr *e) ;
-    virtual void visit(ast::BitNotExpr *e) ;
+    // virtual void visit(ast::IndexExpr *e);
+    // virtual void visit(ast::AddExpr *e) ;
+    // virtual void visit(ast::SubExpr *e) ;
+    // virtual void visit(ast::MulExpr *e) ;
+    // virtual void visit(ast::LesExpr *e) ;
+    // virtual void visit(ast::GrtExpr *e) ;
+    // virtual void visit(ast::LeqExpr *e) ;
+    // virtual void visit(ast::GeqExpr *e) ;
+    // virtual void visit(ast::EquExpr *e) ;
+    // virtual void visit(ast::NeqExpr *e) ;
+    // virtual void visit(ast::AndExpr *e) ;
+    // virtual void visit(ast::OrExpr *e) ;
+    // virtual void visit(ast::DivExpr *e) ;
+    // virtual void visit(ast::ModExpr *e) ;
+    // virtual void visit(ast::IntConst *e) ;
+    // virtual void visit(ast::NegExpr *e) ;
+    // virtual void visit(ast::NotExpr *e) ;
+    // virtual void visit(ast::BitNotExpr *e) ;
     // virtual void visit(ast::LvalueExpr *e) ;
     // virtual void visit(ast::VarRef *ref) ;
 };
@@ -110,7 +118,42 @@ void SemPass1::visit(ast::FuncDefn *fdef) {
 
     Function *f = new Function(fdef->name, t , fdef->getLocation());
 
-    
+    if(fdef->name=="main"){
+        // mind::FList *aa=new mind::FList();
+        Function *f1 = new Function("getint", t, fdef->getLocation());
+        scopes->declare(f1);
+        // aa->append_my(f1);
+        mind::aa.push_front(f1);
+        // f1->attachEntryLabel(tr->getNewEntryLabel(f1));
+        Function *f2 = new Function("getch", t, fdef->getLocation());
+        scopes->declare(f2);
+        mind::aa.push_front(f2);
+        Function *f3 = new Function("getarray", t, fdef->getLocation());
+        scopes->declare(f3);
+        // aa->append_my(f3);
+        mind::aa.push_front(f3);
+        Function *f4 = new Function("putint", t, fdef->getLocation());
+        scopes->declare(f4);
+        // aa->append_my(f4);
+        mind::aa.push_front(f4);
+        Function *f5 = new Function("putch", t, fdef->getLocation());
+        scopes->declare(f5);
+        // aa->append_my(f5);
+        mind::aa.push_front(f5);
+        Function *f6 = new Function("stoptime", t, fdef->getLocation());
+        scopes->declare(f6);
+        // aa->append_my(f6);
+        mind::aa.push_front(f6);
+        Function *f7 = new Function("putarray", t, fdef->getLocation());
+        scopes->declare(f7);
+        // aa->append_my(f7);
+        mind::aa.push_front(f7);
+        Function *f8 = new Function("starttime", t, fdef->getLocation());
+        scopes->declare(f8);
+        // aa->append_my(f8);
+        mind::aa.push_front(f8);
+        // std::cout<<mind::aa.size();
+    }
 
     fdef->ATTR(sym) = f;
 
@@ -122,24 +165,7 @@ void SemPass1::visit(ast::FuncDefn *fdef) {
         issue(fdef->getLocation(), new DeclConflictError(fdef->name, sym));
     else
         scopes->declare(f);
-    if(fdef->name=="main"){
-    //     Function *f1 = new Function("getint", t, fdef->getLocation());
-    //     scopes->declare(f1);
-    //     Function *f2 = new Function("getch", t, fdef->getLocation());
-    //     scopes->declare(f2);
-    //     Function *f3 = new Function("getarray", t, fdef->getLocation());
-    //     scopes->declare(f2);
-    //     Function *f4 = new Function("putint", t, fdef->getLocation());
-    //     scopes->declare(f4);
-    //     Function *f5 = new Function("putch", t, fdef->getLocation());
-    //     scopes->declare(f5);
-    //     Function *f6 = new Function("stoptime", t, fdef->getLocation());
-    //     scopes->declare(f6);
-    //     Function *f7 = new Function("putarray", t, fdef->getLocation());
-    //     scopes->declare(f7);
-    //     Function *f8 = new Function("starttime", t, fdef->getLocation());
-    //     scopes->declare(f8);
-    }
+    
     // opens function scope
     scopes->open(f->getAssociatedScope());
 
@@ -230,32 +256,32 @@ void SemPass1::visit(ast::VarDecl *vdecl) {
     vdecl->type->accept(this);
     
     
-    if(vdecl->ldim!=NULL){
-        vdecl->ldim->accept(this);
-        int length = 1;
-        for(int d : *(vdecl->ldim->ATTR(dim1))){
-            length *= d;
-        }
-        if(length == 0){
-            issue(vdecl->getLocation(), new ZeroLengthedArrayError());
-            return ;
-        }
-        int d=vdecl->ldim->ATTR(dim1)->length();
-        vdecl->type->ATTR(type) = new ArrayType(vdecl->type->ATTR(type), length,d);
-    }
-
-    // if(vdecl->ldim != NULL) {
+    // if(vdecl->ldim!=NULL){
+    //     vdecl->ldim->accept(this);
     //     int length = 1;
-    //     for(int d : *(vdecl->ldim)){
+    //     for(int d : *(vdecl->ldim->ATTR(dim1))){
     //         length *= d;
     //     }
     //     if(length == 0){
     //         issue(vdecl->getLocation(), new ZeroLengthedArrayError());
     //         return ;
     //     }
-    //     int d=vdecl->ldim->length();
+    //     int d=vdecl->ldim->ATTR(dim1)->length();
     //     vdecl->type->ATTR(type) = new ArrayType(vdecl->type->ATTR(type), length,d);
     // }
+
+    if(vdecl->ldim != NULL) {
+        int length = 1;
+        for(int d : *(vdecl->ldim)){
+            length *= d;
+        }
+        if(length == 0){
+            issue(vdecl->getLocation(), new ZeroLengthedArrayError());
+            return ;
+        }
+        int d=vdecl->ldim->length();
+        vdecl->type->ATTR(type) = new ArrayType(vdecl->type->ATTR(type), length,d);
+    }
 
     t = vdecl->type->ATTR(type);
     
@@ -273,7 +299,7 @@ void SemPass1::visit(ast::VarDecl *vdecl) {
         v=new Variable(vdecl->name, t,NULL,vdecl->rdim,con,vdecl->getLocation());
     }
     else{
-        v=new Variable(vdecl->name, t, vdecl->ldim->ATTR(dim1),vdecl->rdim,con,vdecl->getLocation());
+        v=new Variable(vdecl->name, t, vdecl->ldim,vdecl->rdim,con,vdecl->getLocation());
     }
     // Variable *v=new Variable(vdecl->name, t, vdecl->ldim->ATTR(dim1),vdecl->rdim,con,vdecl->getLocation());
     if(con){
@@ -331,189 +357,194 @@ void MindCompiler::buildSymbols(ast::Program *tree) {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SemPass1::visit(ast::IndexExpr *e) {
-    e->ATTR(dim1)=new ast::DimList();
-    for(auto c : *(e->expr_list)){
-        if(c->getKind()==mind::ast::ASTNode::NodeType::LVALUE_EXPR){
-            Symbol *v = scopes->lookup(((ast::VarRef *)((ast::LvalueExpr *)c)->lvalue)->var, ((ast::VarRef *)((ast::LvalueExpr *)c)->lvalue)->getLocation());
-            if(v->iscon){
-                c->ATTR(value)=((symb::Variable *)v)->con_val;
-            }
-            else{
-                mind_assert(false);
-            }
+// void SemPass1::visit(ast::IndexExpr *e) {
+//     e->ATTR(dim1)=new ast::DimList();
+//     for(auto c : *(e->expr_list)){
+//         if(c->getKind()==mind::ast::ASTNode::NodeType::LVALUE_EXPR){
+//             Symbol *v = scopes->lookup(((ast::VarRef *)((ast::LvalueExpr *)c)->lvalue)->var, ((ast::VarRef *)((ast::LvalueExpr *)c)->lvalue)->getLocation());
+//             if(v->iscon){
+//                 c->ATTR(value)=((symb::Variable *)v)->con_val;
+//             }
+//             else{
+//                 mind_assert(false);
+//             }
             
-        }
-        else{
-            c->accept(this);
-        }
-        e->ATTR(dim1)->append(c->ATTR(value));
+//         }
+//         else{
+//             c->accept(this);
+//         }
+//         e->ATTR(dim1)->append(c->ATTR(value));
         
-    }
+//     }
         
-}
+// }
 
-void SemPass1::visit(ast::AddExpr *e) {
-    e->e1->accept(this);
-    e->e2->accept(this);
+// void SemPass1::visit(ast::AddExpr *e) {
+//     e->e1->accept(this);
+//     e->e2->accept(this);
 
     
-    e->ATTR(value)=e->e1->ATTR(value)+e->e2->ATTR(value);
-}
+//     e->ATTR(value)=e->e1->ATTR(value)+e->e2->ATTR(value);
+// }
 
-/* Translating an ast::SubExor node.
- */
-void SemPass1::visit(ast::SubExpr *e) {
-    e->e1->accept(this);
-    e->e2->accept(this);
+// /* Translating an ast::SubExor node.
+//  */
+// void SemPass1::visit(ast::SubExpr *e) {
+//     e->e1->accept(this);
+//     e->e2->accept(this);
 
-    e->ATTR(value)=e->e1->ATTR(value)-e->e2->ATTR(value);
-}
-
-
-/* Translating an ast::MulExpr node.
- */
-void SemPass1::visit(ast::MulExpr *e) {
-    e->e1->accept(this);
-    e->e2->accept(this);
-
-    e->ATTR(value)=e->e1->ATTR(value)*e->e2->ATTR(value);
-}
-
-/* Translating an ast::LesExpr node.
- */
-void SemPass1::visit(ast::LesExpr *e) {
-    e->e1->accept(this);
-    e->e2->accept(this);
-
-    if(e->e1->ATTR(value)<e->e2->ATTR(value)) e->ATTR(value)=1;
-    else e->ATTR(value)=0;
-}
-
-/* Translating an ast::GrtExpr node.
- */
-void SemPass1::visit(ast::GrtExpr *e) {
-    e->e1->accept(this);
-    e->e2->accept(this);
-
-    if(e->e1->ATTR(value)>e->e2->ATTR(value)) e->ATTR(value)=1;
-    else e->ATTR(value)=0;
-}
-
-/* Translating an ast::LeqExpr node.
- */
-void SemPass1::visit(ast::LeqExpr *e) {
-    e->e1->accept(this);
-    e->e2->accept(this);
-
-    if(e->e1->ATTR(value)<=e->e2->ATTR(value)) e->ATTR(value)=1;
-    else e->ATTR(value)=0;
-}
-
-/* Translating an ast::GeqExpr node.
- */
-void SemPass1::visit(ast::GeqExpr *e) {
-    e->e1->accept(this);
-    e->e2->accept(this);
-
-    if(e->e1->ATTR(value)>=e->e2->ATTR(value)) e->ATTR(value)=1;
-    else e->ATTR(value)=0;
-}
+//     e->ATTR(value)=e->e1->ATTR(value)-e->e2->ATTR(value);
+// }
 
 
-/* Translating an ast::EquExpr node.
- */
-void SemPass1::visit(ast::EquExpr *e) {
-    e->e1->accept(this);
-    e->e2->accept(this);
+// /* Translating an ast::MulExpr node.
+//  */
+// void SemPass1::visit(ast::MulExpr *e) {
+//     e->e1->accept(this);
+//     e->e2->accept(this);
 
-    if(e->e1->ATTR(value)==e->e2->ATTR(value)) e->ATTR(value)=1;
-    else e->ATTR(value)=0;
-}
+//     e->ATTR(value)=e->e1->ATTR(value)*e->e2->ATTR(value);
+// }
 
-/* Translating an ast::NeqExpr node.
- */
-void SemPass1::visit(ast::NeqExpr *e) {
-    e->e1->accept(this);
-    e->e2->accept(this);
+// /* Translating an ast::LesExpr node.
+//  */
+// void SemPass1::visit(ast::LesExpr *e) {
+//     e->e1->accept(this);
+//     e->e2->accept(this);
 
-    if(e->e1->ATTR(value)!=e->e2->ATTR(value)) e->ATTR(value)=1;
-    else e->ATTR(value)=0;
-}
+//     if(e->e1->ATTR(value)<e->e2->ATTR(value)) e->ATTR(value)=1;
+//     else e->ATTR(value)=0;
+// }
 
-/* Translating an ast::AndExpr node.
- */
-void SemPass1::visit(ast::AndExpr *e) {
+// /* Translating an ast::GrtExpr node.
+//  */
+// void SemPass1::visit(ast::GrtExpr *e) {
+//     e->e1->accept(this);
+//     e->e2->accept(this);
 
-    e->e1->accept(this);
+//     if(e->e1->ATTR(value)>e->e2->ATTR(value)) e->ATTR(value)=1;
+//     else e->ATTR(value)=0;
+// }
+
+// /* Translating an ast::LeqExpr node.
+//  */
+// void SemPass1::visit(ast::LeqExpr *e) {
+//     e->e1->accept(this);
+//     e->e2->accept(this);
+
+//     if(e->e1->ATTR(value)<=e->e2->ATTR(value)) e->ATTR(value)=1;
+//     else e->ATTR(value)=0;
+// }
+
+// /* Translating an ast::GeqExpr node.
+//  */
+// void SemPass1::visit(ast::GeqExpr *e) {
+//     e->e1->accept(this);
+//     e->e2->accept(this);
+
+//     if(e->e1->ATTR(value)>=e->e2->ATTR(value)) e->ATTR(value)=1;
+//     else e->ATTR(value)=0;
+// }
+
+
+// /* Translating an ast::EquExpr node.
+//  */
+// void SemPass1::visit(ast::EquExpr *e) {
+//     e->e1->accept(this);
+//     e->e2->accept(this);
+
+//     if(e->e1->ATTR(value)==e->e2->ATTR(value)) e->ATTR(value)=1;
+//     else e->ATTR(value)=0;
+// }
+
+// /* Translating an ast::NeqExpr node.
+//  */
+// void SemPass1::visit(ast::NeqExpr *e) {
+//     e->e1->accept(this);
+//     e->e2->accept(this);
+
+//     if(e->e1->ATTR(value)!=e->e2->ATTR(value)) e->ATTR(value)=1;
+//     else e->ATTR(value)=0;
+// }
+
+// /* Translating an ast::AndExpr node.
+//  */
+// void SemPass1::visit(ast::AndExpr *e) {
+
+//     e->e1->accept(this);
     
-    e->e2->accept(this);
+//     e->e2->accept(this);
 
-    e->ATTR(value)=e->e1->ATTR(value)&&e->e2->ATTR(value);
-}
+//     e->ATTR(value)=e->e1->ATTR(value)&&e->e2->ATTR(value);
+// }
 
-/* Translating an ast::OrExpr node.
- */
-void SemPass1::visit(ast::OrExpr *e) {
+// /* Translating an ast::OrExpr node.
+//  */
+// void SemPass1::visit(ast::OrExpr *e) {
    
-    e->e1->accept(this);
+//     e->e1->accept(this);
     
-    e->e2->accept(this);
+//     e->e2->accept(this);
     
-    e->ATTR(value)=e->e1->ATTR(value)||e->e2->ATTR(value);
-}
-/* Translating an ast::DivExpr node.
- */
-void SemPass1::visit(ast::DivExpr *e) {
-    e->e1->accept(this);
-    e->e2->accept(this);
+//     e->ATTR(value)=e->e1->ATTR(value)||e->e2->ATTR(value);
+// }
+// /* Translating an ast::DivExpr node.
+//  */
+// void SemPass1::visit(ast::DivExpr *e) {
+//     e->e1->accept(this);
+//     e->e2->accept(this);
 
     
-    e->ATTR(value)=e->e1->ATTR(value)/e->e2->ATTR(value);
-}
+//     e->ATTR(value)=e->e1->ATTR(value)/e->e2->ATTR(value);
+// }
 
 
-/* Translating an ast::ModExpr node.
- */
-void SemPass1::visit(ast::ModExpr *e) {
-    e->e1->accept(this);
-    e->e2->accept(this);
+// /* Translating an ast::ModExpr node.
+//  */
+// void SemPass1::visit(ast::ModExpr *e) {
+//     e->e1->accept(this);
+//     e->e2->accept(this);
 
 
-    e->ATTR(value)=e->e1->ATTR(value)%e->e2->ATTR(value);
-}
+//     e->ATTR(value)=e->e1->ATTR(value)%e->e2->ATTR(value);
+// }
 
 
-/* Translating an ast::IntConst node.
- */
-void SemPass1::visit(ast::IntConst *e) {
-    e->ATTR(value)=e->value;
-}
+// /* Translating an ast::IntConst node.
+//  */
+// void SemPass1::visit(ast::IntConst *e) {
+//     e->ATTR(value)=e->value;
+// }
 
-/* Translating an ast::NegExpr node.
- */
-void SemPass1::visit(ast::NegExpr *e) {
-    e->e->accept(this);
+// /* Translating an ast::NegExpr node.
+//  */
+// void SemPass1::visit(ast::NegExpr *e) {
+//     e->e->accept(this);
 
-    e->ATTR(value)=-(e->e->ATTR(value));
-}
-/* Translating an ast::NotExpr node.
- */
-void SemPass1::visit(ast::NotExpr *e) {
-    e->e->accept(this);
-
-
-    e->ATTR(value)=~(e->e->ATTR(value));
-}
-/* Translating an ast::BitNotExpr node.
- */
-void SemPass1::visit(ast::BitNotExpr *e) {
-    e->e->accept(this);
+//     e->ATTR(value)=-(e->e->ATTR(value));
+// }
+// /* Translating an ast::NotExpr node.
+//  */
+// void SemPass1::visit(ast::NotExpr *e) {
+//     e->e->accept(this);
 
 
-    e->ATTR(value)=!(e->e->ATTR(value));
+//     e->ATTR(value)=~(e->e->ATTR(value));
+// }
+// /* Translating an ast::BitNotExpr node.
+//  */
+// void SemPass1::visit(ast::BitNotExpr *e) {
+//     e->e->accept(this);
 
-}
+
+//     e->ATTR(value)=!(e->e->ATTR(value));
+
+// }
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
 
 /* Translating an ast::LvalueExpr node.
  *

@@ -1,7 +1,8 @@
 /*****************************************************
  *  Implementation of the third translation pass.
  *
- *  In the third pass, we will:
+ *  In the third pass, we will: 
+ * 
  *    translate all the statements and expressions
  *
  *  Keltin Leung 
@@ -17,6 +18,7 @@
 #include "tac/tac.hpp"
 #include "tac/trans_helper.hpp"
 #include "type/type.hpp"
+#include "scope/scope_stack.hpp"
 
 using namespace mind;
 using namespace mind::symb;
@@ -38,9 +40,30 @@ Translation::Translation(tac::TransHelper *helper) {
 /* Translating an ast::Program node.
  */
 void Translation::visit(ast::Program *p) {
+    if(!mind::aa.empty()){
+        // std::cout<<mind::aa.size();
+        // if(*(aa.begin())!=NULL){
+        //     std::cout<<"Dfs";
+        // }
+            // std::cout<<(*(aa.begin()))->getName();
+        for(auto it:mind::aa){
+            it->attachEntryLabel(tr->getNewEntryLabel(it));
+        }
+        // for(auto it=mind::aa.begin();it!=mind::aa.end();it++){
+        //     (*it)->attachEntryLabel(tr->getNewEntryLabel((*it)));
+        // }
+        // std::cout<<"fd";
+    }
+    
     for (auto it = p->func_and_globals->begin();
          it != p->func_and_globals->end(); ++it)
         (*it)->accept(this);
+    
+        // Function *v = (Function *)scopes->lookup("getint", p->getLocation(),false);
+        // if(v!=NULL){
+        //     v->attachEntryLabel(tr->getNewEntryLabel(v));
+        // }
+    
 }
 
 // three sugars for parameter of fset management
@@ -57,8 +80,9 @@ void Translation::visit(ast::FuncDefn *f) {
     Function *fun = f->ATTR(sym);
 
     // attaching function entry label
+    
     fun->attachEntryLabel(tr->getNewEntryLabel(fun));
-
+    
     // arguments
     int order = 0;
     for (auto it = f->formals->begin(); it != f->formals->end(); ++it) {
@@ -582,28 +606,28 @@ void Translation::visit(ast::VarDecl *decl) {
     // TODO
     //具体步骤就是先为这个变量的左值分配一个Temp，若在变量的定义中发现他拥有赋值的操作，那就应该生成Assign语句的
     //三元表达式
-    if(decl->const1){
-        if(decl->ATTR(sym)->isGlobalVar()){
-            if(decl->type->ATTR(type)->isArrayType()){
+    // if(decl->const1){
+    //     if(decl->ATTR(sym)->isGlobalVar()){
+    //         if(decl->type->ATTR(type)->isArrayType()){
 
-            }
-            else{
-                decl->ATTR(sym)->con_val=decl->init->ATTR(value);
-            }
-        }
-        else{
-            if(decl->type->ATTR(type)->isArrayType()){
+    //         }
+    //         else{
+    //             decl->ATTR(sym)->con_val=decl->init->ATTR(value);
+    //         }
+    //     }
+    //     else{
+    //         if(decl->type->ATTR(type)->isArrayType()){
 
-            }
-            else{
-                decl->ATTR(sym)->con_val=decl->init->ATTR(value);
-            }
-        }
+    //         }
+    //         else{
+    //             decl->ATTR(sym)->con_val=decl->init->ATTR(value);
+    //         }
+    //     }
         
-    }
-    else{
+    // }
+    // else{
 
-    }
+    // }
     if(decl->ATTR(sym)->isGlobalVar()){
         if(decl->type->ATTR(type)->isArrayType()){
             // if(decl->ATTR(sym)->rdim==NULL){

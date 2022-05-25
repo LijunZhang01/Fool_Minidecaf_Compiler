@@ -203,8 +203,8 @@ scope/scope_stack.o: 3rdparty/list.hpp error.hpp scope/scope_stack.hpp
 scope/scope_stack.o: scope/scope.hpp 3rdparty/stack.hpp
 asm/offset_counter.o: config.hpp 3rdparty/boehmgc.hpp define.hpp
 asm/offset_counter.o: 3rdparty/list.hpp error.hpp asm/offset_counter.hpp
-translation/build_sym.o: config.hpp 3rdparty/boehmgc.hpp define.hpp
-translation/build_sym.o: 3rdparty/list.hpp error.hpp ast/ast.hpp ast/visitor.hpp
+translation/build_sym.o:  config.hpp  3rdparty/boehmgc.hpp define.hpp
+translation/build_sym.o:  3rdparty/list.hpp error.hpp ast/ast.hpp ast/visitor.hpp
 translation/build_sym.o: scope/scope.hpp scope/scope_stack.hpp 3rdparty/stack.hpp
 translation/build_sym.o: symb/symbol.hpp type/type.hpp compiler.hpp
 translation/type_check.o: config.hpp 3rdparty/boehmgc.hpp define.hpp

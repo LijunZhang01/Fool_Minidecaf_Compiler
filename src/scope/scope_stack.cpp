@@ -15,6 +15,7 @@ using namespace mind::util;
 // the global ScopeStack instance
 static ScopeStack __global_scope_stack;
 ScopeStack *mind::scopes = &__global_scope_stack;
+// typedef util::List<Function *> FList;
 
 typedef Stack<Scope *> stk_t;
 

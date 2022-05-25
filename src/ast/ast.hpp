@@ -207,13 +207,13 @@ class VarDecl : public Statement {
     VarDecl(std::string name, Type *type, Expr *init, DouList *lian,Location *l);
     VarDecl(std::string name, Expr *init, Location *l);
 
-    VarDecl(std::string name, Type *type, IndexExpr *ldim,DimList *rdim, DouList *lian,Location *l);
-    VarDecl(std::string name, Type *type,IndexExpr *ldim,DouList *lian,Location *l);
-    VarDecl(std::string name, IndexExpr *ldim,DimList *rdim,Location *l);
-    VarDecl(std::string name,IndexExpr *ldim,Location *l);
+    VarDecl(std::string name, Type *type, DimList *ldim,DimList *rdim, DouList *lian,Location *l);
+    VarDecl(std::string name, Type *type,DimList *ldim,DouList *lian,Location *l);
+    VarDecl(std::string name, DimList *ldim,DimList *rdim,Location *l);
+    VarDecl(std::string name,DimList *ldim,Location *l);
 
     VarDecl(std::string const1,std::string name, Type *type, Expr *init, DouList *lian,Location *l);
-    VarDecl(std::string const1,std::string name, Type *type, IndexExpr *ldim,DimList *rdim, DouList *lian,Location *l);
+    VarDecl(std::string const1,std::string name, Type *type, DimList *ldim,DimList *rdim, DouList *lian,Location *l);
     virtual void accept(Visitor *);
     virtual void dumpTo(std::ostream &);
 
@@ -223,7 +223,7 @@ class VarDecl : public Statement {
     Expr *init;
     DouList *lian;
     symb::Variable *ATTR(sym); // for semantic analysis
-    IndexExpr *ldim;
+    DimList *ldim;
     DimList *rdim;
     std::int16_t const1;
 };

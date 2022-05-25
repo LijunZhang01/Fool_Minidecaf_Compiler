@@ -21,7 +21,7 @@
 #include "3rdparty/boehmgc.hpp"
 #include "define.hpp"
 #include "error.hpp"
-
+#include "3rdparty/list.hpp"
 #include <cstring>
 #include <iostream>
 #include <memory>
@@ -33,6 +33,8 @@ namespace mind {
 extern scope::ScopeStack *scopes;
 extern ast::Type *quanju;
 extern std::list<mind::tac::Tac> canlian ;
+// extern std::list<mind::symb::Function> aa ;
+extern std::list<mind::symb::Function *> aa;
 
 /* Output Functions */
 std::ostream &operator<<(std::ostream &, Location *);
