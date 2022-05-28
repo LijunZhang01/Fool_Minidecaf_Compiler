@@ -826,9 +826,9 @@ class NegExpr : public Expr {
   public:
     Expr *e;
 };
-class OneAddExpr : public Expr {
+class FNegExpr : public Expr {
   public:
-    OneAddExpr(Expr *e, Location *l);
+    FNegExpr(Expr *e, Location *l);
 
     virtual void accept(Visitor *);
     virtual void dumpTo(std::ostream &);

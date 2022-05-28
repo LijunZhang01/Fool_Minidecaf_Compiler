@@ -113,7 +113,7 @@ void scan_end();
 %left LEQ GEQ LT GT
 %left     PLUS MINUS
 %left     TIMES SLASH MOD
-%nonassoc LNOT NEG BNOT
+%right LNOT NEG BNOT FNEG
 %nonassoc LBRACK DOT
 /*https://en.cppreference.com/w/c/language/operator_precedence*/
 %{
@@ -359,6 +359,10 @@ Expr        : ICONST
                 { $$ = new ast::IfExpr($1,$3,$5,POS(@2)); }
             | MINUS Expr  %prec NEG
                 { $$ = new ast::NegExpr($2, POS(@1)); }
+
+            | PLUS Expr %prec FNEG
+                { $$ = new ast::FNegExpr($2, POS(@1)); }
+
             | LNOT Expr  %prec LNOT
                 { $$ = new ast::BitNotExpr($2, POS(@1)); }
             | BNOT Expr  %prec BNOT
@@ -379,8 +383,7 @@ Expr        : ICONST
                 { $$ = new ast::AndExpr($1,$3, POS(@2)); }
             | Expr OR Expr %prec OR
                 { $$ = new ast::OrExpr($1,$3, POS(@2)); }
-            
-            
+
             ;
 
 %%

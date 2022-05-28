@@ -44,3 +44,5 @@ void NegExpr::dumpTo(std::ostream &os) {
     os << e << ")";
     decIndent(os);
 }
+
+

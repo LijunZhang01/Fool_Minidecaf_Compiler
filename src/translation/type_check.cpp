@@ -51,6 +51,8 @@ class SemPass2 : public ast::Visitor {
 
     virtual void visit(ast::IntConst *);
     virtual void visit(ast::NegExpr *);
+
+    virtual void visit(ast::FNegExpr *);
     //增加NotExpr,BitNotExpr;
     virtual void visit(ast::NotExpr *);
     virtual void visit(ast::BitNotExpr *);
@@ -309,6 +311,13 @@ void SemPass2::visit(ast::NegExpr *e) {
     e->ATTR(type) = BaseType::Int;
 }
 
+
+void SemPass2::visit(ast::FNegExpr *e) {
+    e->e->accept(this);
+    expect(e->e, BaseType::Int);
+    e->ATTR(value)=+(e->e->ATTR(value));
+    e->ATTR(type) = BaseType::Int;
+}
 /*step1 
  *Visits an ast::NotExpr node.
  *

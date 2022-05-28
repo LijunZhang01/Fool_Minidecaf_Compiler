@@ -33,7 +33,7 @@ AST     = ast/ast.o ast/ast_add_expr.o ast/ast_and_expr.o  ast/ast_or_expr.o\
           ast/ast_cmp_expr.o ast/ast_div_expr.o ast/ast_equ_expr.o ast/ast_neq_expr.o ast/ast_expr_stmt.o ast/ast_index_expr.o \
           ast/ast_if_stmt.o ast/ast_int_const.o ast/ast_int_type.o \
           ast/ast_lvalue_expr.o ast/ast_mod_expr.o \
-          ast/ast_mul_expr.o ast/ast_neg_expr.o \
+          ast/ast_mul_expr.o ast/ast_neg_expr.o ast/ast_fneg_expr.o \
           ast/ast_call_expr.o \
           ast/ast_not_expr.o \
           ast/ast_program.o ast/ast_func_defn.o \
@@ -141,6 +141,11 @@ ast/ast_mul_expr.o: config.hpp 3rdparty/boehmgc.hpp define.hpp
 ast/ast_mul_expr.o: 3rdparty/list.hpp error.hpp ast/ast.hpp ast/visitor.hpp
 ast/ast_neg_expr.o: config.hpp 3rdparty/boehmgc.hpp define.hpp
 ast/ast_neg_expr.o: 3rdparty/list.hpp error.hpp ast/ast.hpp ast/visitor.hpp
+
+ast/ast_fneg_expr.o: config.hpp 3rdparty/boehmgc.hpp define.hpp
+ast/ast_fneg_expr.o: 3rdparty/list.hpp error.hpp ast/ast.hpp ast/visitor.hpp
+
+
 ast/ast_neq_expr.o: config.hpp 3rdparty/boehmgc.hpp define.hpp
 ast/ast_neq_expr.o: 3rdparty/list.hpp error.hpp ast/ast.hpp ast/visitor.hpp
 ast/ast_not_expr.o: config.hpp 3rdparty/boehmgc.hpp define.hpp

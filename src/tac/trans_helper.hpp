@@ -53,7 +53,7 @@ class TransHelper {
     Temp genGtr(Temp, Temp);
     Temp genGeq(Temp, Temp);
     Temp genNeg(Temp);
-    Temp genOneAdd(Temp);
+    // Temp genOneAdd(Temp);
     Temp genCall(Label);
 
     Temp genLoad(Temp,int);

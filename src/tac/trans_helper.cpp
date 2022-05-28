@@ -362,11 +362,7 @@ Temp TransHelper::genNeg(Temp src) {
     return c;
 }
 
-Temp TransHelper::genOneAdd(Temp src) {
-    Temp c = getNewTempI4();
-    chainUp(Tac::Assign(c, src));
-    return c;
-}
+
 
 /* Appends a LAnd tac node to the current list.
  *

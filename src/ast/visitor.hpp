@@ -49,7 +49,7 @@ class Visitor {
     virtual void visit(MulExpr *) {}
     virtual void visit(NegExpr *) {}
 
-    // virtual void visit(OneAddExpr *) {}
+    
 
     virtual void visit(NotExpr *) {}
     virtual void visit(BitNotExpr *) {}
@@ -82,6 +82,7 @@ class Visitor {
     // 尝试
     virtual void visit(VarDecl_1 *) {}
     virtual void visit(VarDecl_2 *) {}
+    virtual void visit(FNegExpr *) {}
     virtual ~Visitor() {}
 };
 } // namespace ast

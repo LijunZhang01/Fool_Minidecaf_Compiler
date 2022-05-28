@@ -480,6 +480,13 @@ void Translation::visit(ast::NegExpr *e) {
     e->ATTR(val) = tr->genNeg(e->e->ATTR(val));
     e->ATTR(value)=-(e->e->ATTR(value));
 }
+
+void Translation::visit(ast::FNegExpr *e) {
+    e->e->accept(this);
+
+    e->ATTR(val) = e->e->ATTR(val);
+    e->ATTR(value)=-(e->e->ATTR(value));
+}
 /* Translating an ast::NotExpr node.
  */
 void Translation::visit(ast::NotExpr *e) {
