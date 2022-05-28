@@ -48,6 +48,9 @@ class Visitor {
     virtual void visit(ModExpr *) {}
     virtual void visit(MulExpr *) {}
     virtual void visit(NegExpr *) {}
+
+    // virtual void visit(OneAddExpr *) {}
+
     virtual void visit(NotExpr *) {}
     virtual void visit(BitNotExpr *) {}
     virtual void visit(SubExpr *) {}

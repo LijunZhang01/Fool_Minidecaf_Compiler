@@ -109,7 +109,7 @@ static void expect(ast::Expr *e, Type *t) {
  * PARAMETERS:
  *   e     - the ast::IntConst node
  */
-void SemPass2::visit(ast::IntConst *e) { e->ATTR(type) = BaseType::Int; }
+void SemPass2::visit(ast::IntConst *e) { e->ATTR(type) = BaseType::Int;e->ATTR(value)=e->value; }
 
 
 /* SemPass2 an ast::LesExpr node.
@@ -120,7 +120,8 @@ void SemPass2::visit(ast::LesExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-
+    if(e->e1->ATTR(value)<e->e2->ATTR(value)) e->ATTR(value)=1;
+    else e->ATTR(value)=0;
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -132,7 +133,8 @@ void SemPass2::visit(ast::GrtExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-
+    if(e->e1->ATTR(value)>e->e2->ATTR(value)) e->ATTR(value)=1;
+    else e->ATTR(value)=0;
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -144,7 +146,8 @@ void SemPass2::visit(ast::LeqExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-
+    if(e->e1->ATTR(value)<=e->e2->ATTR(value)) e->ATTR(value)=1;
+    else e->ATTR(value)=0;
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -156,7 +159,8 @@ void SemPass2::visit(ast::GeqExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-
+    if(e->e1->ATTR(value)>=e->e2->ATTR(value)) e->ATTR(value)=1;
+    else e->ATTR(value)=0;
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -169,7 +173,8 @@ void SemPass2::visit(ast::EquExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-
+    if(e->e1->ATTR(value)==e->e2->ATTR(value)) e->ATTR(value)=1;
+    else e->ATTR(value)=0;
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -181,7 +186,8 @@ void SemPass2::visit(ast::NeqExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-
+    if(e->e1->ATTR(value)!=e->e2->ATTR(value)) e->ATTR(value)=1;
+    else e->ATTR(value)=0;
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -193,7 +199,7 @@ void SemPass2::visit(ast::AndExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-
+    e->ATTR(value)=e->e1->ATTR(value)&&e->e2->ATTR(value);
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -205,7 +211,7 @@ void SemPass2::visit(ast::OrExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-
+    e->ATTR(value)=e->e1->ATTR(value)||e->e2->ATTR(value);
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -222,7 +228,7 @@ void SemPass2::visit(ast::AddExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-
+    e->ATTR(value)=e->e1->ATTR(value)+e->e2->ATTR(value);
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -238,7 +244,7 @@ void SemPass2::visit(ast::SubExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-
+    e->ATTR(value)=e->e1->ATTR(value)-e->e2->ATTR(value);
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -254,7 +260,7 @@ void SemPass2::visit(ast::MulExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-
+    e->ATTR(value)=e->e1->ATTR(value)*e->e2->ATTR(value);
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -270,7 +276,7 @@ void SemPass2::visit(ast::DivExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-
+    e->ATTR(value)=e->e1->ATTR(value)/e->e2->ATTR(value);
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -286,7 +292,7 @@ void SemPass2::visit(ast::ModExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-
+    e->ATTR(value)=e->e1->ATTR(value)%e->e2->ATTR(value);
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -299,7 +305,7 @@ void SemPass2::visit(ast::ModExpr *e) {
 void SemPass2::visit(ast::NegExpr *e) {
     e->e->accept(this);
     expect(e->e, BaseType::Int);
-
+    e->ATTR(value)=-(e->e->ATTR(value));
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -312,7 +318,7 @@ void SemPass2::visit(ast::NegExpr *e) {
 void SemPass2::visit(ast::NotExpr *e) {
     e->e->accept(this);
     expect(e->e, BaseType::Int);
-
+    e->ATTR(value)=~(e->e->ATTR(value));
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -325,7 +331,7 @@ void SemPass2::visit(ast::NotExpr *e) {
 void SemPass2::visit(ast::BitNotExpr *e) {
     e->e->accept(this);
     expect(e->e, BaseType::Int);
-
+    e->ATTR(value)=!(e->e->ATTR(value));
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -337,6 +343,7 @@ void SemPass2::visit(ast::BitNotExpr *e) {
 void SemPass2::visit(ast::LvalueExpr *e) {
     e->lvalue->accept(this);
     e->ATTR(type) = e->lvalue->ATTR(type);
+    e->ATTR(value)=e->lvalue->value;
 }
 
 /* Visits an ast::VarRef node.
@@ -365,7 +372,26 @@ void SemPass2::visit(ast::AssignExpr *s) {
         issue(s->getLocation(),
               new IncompatibleError(s->left->ATTR(type), s->e->ATTR(type)));
     }
+    ast::VarRef *lin=((ast::VarRef *)s->left);
+    Symbol *v = scopes->lookup(lin->var, lin->getLocation());
+    if (NULL == v) {
+        issue(lin->getLocation(), new SymbolNotFoundError(lin->var));
+        return;
 
+    } else if (!v->isVariable()) {
+        issue(lin->getLocation(), new NotVariableError(v));
+        return;
+
+    } else{
+        ((Variable *)v)->value_v=s->e->ATTR(value);
+        if(lin->ldim==NULL){
+            
+        }
+        else{
+
+        }
+    }
+    // s->left->value=s->e->ATTR(value);
     s->ATTR(type) = s->left->ATTR(type);
 }
 void SemPass2::visit(ast::VarRef *ref) {
@@ -381,7 +407,7 @@ void SemPass2::visit(ast::VarRef *ref) {
 
     } else {
         ref->ATTR(sym) = (Variable *)v;
-        
+        ref->value=ref->ATTR(sym)->value_v;
         if(ref->ldim==NULL){
             ref->ATTR(type) = v->getType();
 
@@ -424,6 +450,7 @@ void SemPass2::visit(ast::CallExpr *ref) {
     // CASE I: owner is NULL ==> referencing a local var or a member var?
 
     //检查函数名是否被定义
+    
     Function *v = (Function *)scopes->lookup(ref->name, ref->getLocation());
     util::List<Type *>::iterator iter1 = v->getType()->getArgList()->begin();//函数定义时存储的形参数类型,放在这里防止goto报错
     if (NULL == v) {
@@ -438,19 +465,42 @@ void SemPass2::visit(ast::CallExpr *ref) {
         ref->ATTR(type) = v->getResultType(); //函数的返回类型
         ref->ATTR(sym) = v;
     }
-
-    //检查参数的数量是否和函数定义的数量相同
-    if(ref->elist->length()!=v->getType()->numOfParameters()){
-        issue(ref->getLocation(),new SymbolNotFoundError(ref->name));
+    if(!(ref->name=="getint"||
+        ref->name=="getch"||
+        ref->name=="getarray"||
+        ref->name=="putint"||
+        ref->name=="putch"||
+        ref->name=="putarray"||
+        ref->name=="starttime"||
+        ref->name=="stoptime")){
+            if(ref->elist->length()!=v->getType()->numOfParameters()){
+                issue(ref->getLocation(),new SymbolNotFoundError(ref->name));
+            }
+                for(auto item:*(ref->elist)){
+                    item->accept(this);
+                    expect(item,*iter1);
+                    ++iter1;
+            }
+        }
+    else{
+        for(auto item:*(ref->elist)){
+                    item->accept(this);
+                    // expect(item,*iter1);
+                    ++iter1;
+            }
     }
+    //检查参数的数量是否和函数定义的数量相同
+    // if(ref->elist->length()!=v->getType()->numOfParameters()){
+    //     issue(ref->getLocation(),new SymbolNotFoundError(ref->name));
+    // }
 
     //检查每一个参数的类型是否一致，其实只有int，感觉不用检查，~~~~~
     
-    for(auto item:*(ref->elist)){
-        item->accept(this);
-        expect(item,*iter1);
-        ++iter1;
-    }
+    // for(auto item:*(ref->elist)){
+    //     item->accept(this);
+    //     expect(item,*iter1);
+    //     ++iter1;
+    // }
     return;
 
     // sometimes "GOTO" will make things simpler. this is one of such cases:

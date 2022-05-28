@@ -136,6 +136,7 @@ void SemPass1::visit(ast::FuncDefn *fdef) {
         scopes->declare(f4);
         // aa->append_my(f4);
         mind::aa.push_front(f4);
+        f4->appendParameter(new symb::Variable("",t,fdef->getLocation()));
         Function *f5 = new Function("putch", t, fdef->getLocation());
         scopes->declare(f5);
         // aa->append_my(f5);
@@ -294,7 +295,7 @@ void SemPass1::visit(ast::VarDecl *vdecl) {
     // 4. Special processing for global variables
     // 5. Tag the symbol to `vdecl->ATTR(sym)`
     std::int16_t con=vdecl->const1;
-     Variable *v;
+    Variable *v;
     if(vdecl->ldim==NULL){
         v=new Variable(vdecl->name, t,NULL,vdecl->rdim,con,vdecl->getLocation());
     }
@@ -302,13 +303,13 @@ void SemPass1::visit(ast::VarDecl *vdecl) {
         v=new Variable(vdecl->name, t, vdecl->ldim,vdecl->rdim,con,vdecl->getLocation());
     }
     // Variable *v=new Variable(vdecl->name, t, vdecl->ldim->ATTR(dim1),vdecl->rdim,con,vdecl->getLocation());
-    if(con){
-        if(vdecl->init!=NULL){
-            vdecl->init->accept(this);
-            v->con_val=vdecl->init->ATTR(value);
-        }
+    // if(con){
+    //     if(vdecl->init!=NULL){
+    //         vdecl->init->accept(this);
+    //         v->con_val=vdecl->init->ATTR(value);
+    //     }
         
-    }
+    // }
     vdecl->ATTR(sym) = v;
     Symbol *sym = scopes->lookup(vdecl->name, vdecl->getLocation(), 0);
     if(sym != NULL)

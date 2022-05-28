@@ -72,7 +72,8 @@ class ASTNode {
         FOD,
         VArDecl_1,
         VArDecl_2,
-        INDEX_EXPR
+        INDEX_EXPR,
+        ONEADD,
     } NodeType;
 
   protected:
@@ -157,6 +158,7 @@ class Lvalue : public ASTNode {
     } ATTR(lv_kind);
 
     type::Type *ATTR(type); // for semantic analysis
+    int value;
 };
 
 /* Node representing a program.
@@ -498,6 +500,7 @@ class VarRef : public Lvalue {
     IndexExpr *ldim;
     symb::Variable *ATTR(sym); // for tac generation
     int m;
+    
 };
 
 class PointerRef : public Lvalue {
@@ -816,6 +819,16 @@ class IfExpr : public Expr {
 class NegExpr : public Expr {
   public:
     NegExpr(Expr *e, Location *l);
+
+    virtual void accept(Visitor *);
+    virtual void dumpTo(std::ostream &);
+
+  public:
+    Expr *e;
+};
+class OneAddExpr : public Expr {
+  public:
+    OneAddExpr(Expr *e, Location *l);
 
     virtual void accept(Visitor *);
     virtual void dumpTo(std::ostream &);

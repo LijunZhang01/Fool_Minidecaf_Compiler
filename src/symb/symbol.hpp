@@ -87,6 +87,7 @@ class Variable : public Symbol {
     ast::DimList *rdim;
     ast::DimList *dim;
     int con_val;
+    int value_v;
     Variable(std::string n, type::Type *t, Location *l);
     Variable(std::string n, type::Type *t, ast::DimList *dim,ast::DimList *rdim,std::int16_t con, Location *l);
     // Sets the parameter flag

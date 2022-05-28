@@ -47,7 +47,7 @@ YY_DECL;
 %{
   // A number symbol corresponding to the value in S.
   yy::parser::symbol_type
-  make_ICONST (const std::string &s, const yy::parser::location_type& loc);
+  make_ICONST (const std::string &s, const yy::parser::location_type& loc,const int a);
 %}
 
 /* SECTION II: macro definition */
@@ -55,6 +55,8 @@ NEWLINE       (\r|\n|\r\n)
 WHITESPACE    ([ \t]+)
 INTEGER       ([0-9]+)
 IDENTIFIER    ([A-Za-z][_0-9A-Za-z]*)
+HINTEGER     0[xX][0-9a-fA-F]+
+DINTEGER     0[0-7]+
 
 /* SECTION III: matching rules (and actions) */
 %x B C
@@ -116,7 +118,9 @@ IDENTIFIER    ([A-Za-z][_0-9A-Za-z]*)
 "["       { return yy::parser::make_LBRACK (loc);       }
 "]"       { return yy::parser::make_RBRACK (loc);       }
 
-{INTEGER}     {return make_ICONST(yytext, loc);}
+{INTEGER}     {return make_ICONST(yytext, loc,10);}
+{HINTEGER}     {return make_ICONST(yytext, loc,16);}
+{DINTEGER}     {return make_ICONST(yytext, loc,8);}
 
 {IDENTIFIER}  {return yy::parser::make_IDENTIFIER (yytext, loc); }
 
@@ -126,10 +130,10 @@ IDENTIFIER    ([A-Za-z][_0-9A-Za-z]*)
 /* SECTION IV: customized section */
 int myline, mycol;
 yy::parser::symbol_type
-make_ICONST (const std::string &s, const yy::parser::location_type& loc)
+make_ICONST (const std::string &s, const yy::parser::location_type& loc,const int a)
 {
   errno = 0;
-  long n = strtol (s.c_str(), NULL, 10);
+  long n = strtol (s.c_str(), NULL, (int)a);
   if (! (INT_MIN <= n && n <= INT_MAX && errno != ERANGE))
     throw yy::parser::syntax_error (loc, "integer is out of range: " + s);
   return yy::parser::make_ICONST ((int) n, loc);

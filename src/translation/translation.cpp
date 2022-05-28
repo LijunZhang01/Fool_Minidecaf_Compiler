@@ -552,8 +552,11 @@ void Translation::visit(ast::LvalueExpr *e) {
 
 
 void Translation::visit(ast::CallExpr *e) {
+
+
     
     for(auto expr : *(e->elist)){
+        // std::cout<<((ast::LvalueExpr *)expr)->ATTR(value);
         expr->accept(this); 
         assert(expr->ATTR(val) != NULL);
         tr->genPush(expr->ATTR(val));

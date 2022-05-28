@@ -224,14 +224,14 @@ IndexExpr1   : /* EMPTY */
                 {$$ = new ast::DimList();} 
             | COMMA ICONST IndexExpr1
                 { $$ = $3;
-                  $$->append($2);
+                  $$->append_my($2);
                 }
             | COMMA IndexExpr1
                 { $$ = $2;
                 }
             | ICONST IndexExpr1
                 { $$ = $2;
-                  $$->append($1);
+                  $$->append_my($1);
                 }
             | LBRACE IndexExpr1 RBRACE IndexExpr1 
                 { 
