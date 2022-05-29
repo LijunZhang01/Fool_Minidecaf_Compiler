@@ -111,7 +111,7 @@ static void expect(ast::Expr *e, Type *t) {
  * PARAMETERS:
  *   e     - the ast::IntConst node
  */
-void SemPass2::visit(ast::IntConst *e) { e->ATTR(type) = BaseType::Int;e->ATTR(value)=e->value; }
+void SemPass2::visit(ast::IntConst *e) { e->ATTR(type) = BaseType::Int;}
 
 
 /* SemPass2 an ast::LesExpr node.
@@ -122,8 +122,7 @@ void SemPass2::visit(ast::LesExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-    if(e->e1->ATTR(value)<e->e2->ATTR(value)) e->ATTR(value)=1;
-    else e->ATTR(value)=0;
+
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -135,8 +134,7 @@ void SemPass2::visit(ast::GrtExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-    if(e->e1->ATTR(value)>e->e2->ATTR(value)) e->ATTR(value)=1;
-    else e->ATTR(value)=0;
+    
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -148,8 +146,7 @@ void SemPass2::visit(ast::LeqExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-    if(e->e1->ATTR(value)<=e->e2->ATTR(value)) e->ATTR(value)=1;
-    else e->ATTR(value)=0;
+   
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -161,8 +158,7 @@ void SemPass2::visit(ast::GeqExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-    if(e->e1->ATTR(value)>=e->e2->ATTR(value)) e->ATTR(value)=1;
-    else e->ATTR(value)=0;
+   
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -175,8 +171,7 @@ void SemPass2::visit(ast::EquExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-    if(e->e1->ATTR(value)==e->e2->ATTR(value)) e->ATTR(value)=1;
-    else e->ATTR(value)=0;
+    
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -188,8 +183,7 @@ void SemPass2::visit(ast::NeqExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-    if(e->e1->ATTR(value)!=e->e2->ATTR(value)) e->ATTR(value)=1;
-    else e->ATTR(value)=0;
+    
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -201,7 +195,7 @@ void SemPass2::visit(ast::AndExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-    e->ATTR(value)=e->e1->ATTR(value)&&e->e2->ATTR(value);
+
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -213,7 +207,7 @@ void SemPass2::visit(ast::OrExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-    e->ATTR(value)=e->e1->ATTR(value)||e->e2->ATTR(value);
+
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -230,7 +224,7 @@ void SemPass2::visit(ast::AddExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-    e->ATTR(value)=e->e1->ATTR(value)+e->e2->ATTR(value);
+
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -246,7 +240,7 @@ void SemPass2::visit(ast::SubExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-    e->ATTR(value)=e->e1->ATTR(value)-e->e2->ATTR(value);
+
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -262,7 +256,7 @@ void SemPass2::visit(ast::MulExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-    e->ATTR(value)=e->e1->ATTR(value)*e->e2->ATTR(value);
+
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -278,7 +272,7 @@ void SemPass2::visit(ast::DivExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-    e->ATTR(value)=e->e1->ATTR(value)/e->e2->ATTR(value);
+
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -294,7 +288,7 @@ void SemPass2::visit(ast::ModExpr *e) {
 
     e->e2->accept(this);
     expect(e->e2, BaseType::Int);
-    e->ATTR(value)=e->e1->ATTR(value)%e->e2->ATTR(value);
+ 
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -307,7 +301,7 @@ void SemPass2::visit(ast::ModExpr *e) {
 void SemPass2::visit(ast::NegExpr *e) {
     e->e->accept(this);
     expect(e->e, BaseType::Int);
-    e->ATTR(value)=-(e->e->ATTR(value));
+
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -315,7 +309,7 @@ void SemPass2::visit(ast::NegExpr *e) {
 void SemPass2::visit(ast::FNegExpr *e) {
     e->e->accept(this);
     expect(e->e, BaseType::Int);
-    e->ATTR(value)=+(e->e->ATTR(value));
+
     e->ATTR(type) = BaseType::Int;
 }
 /*step1 
@@ -327,7 +321,7 @@ void SemPass2::visit(ast::FNegExpr *e) {
 void SemPass2::visit(ast::NotExpr *e) {
     e->e->accept(this);
     expect(e->e, BaseType::Int);
-    e->ATTR(value)=~(e->e->ATTR(value));
+
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -340,7 +334,7 @@ void SemPass2::visit(ast::NotExpr *e) {
 void SemPass2::visit(ast::BitNotExpr *e) {
     e->e->accept(this);
     expect(e->e, BaseType::Int);
-    e->ATTR(value)=!(e->e->ATTR(value));
+ 
     e->ATTR(type) = BaseType::Int;
 }
 
@@ -352,7 +346,7 @@ void SemPass2::visit(ast::BitNotExpr *e) {
 void SemPass2::visit(ast::LvalueExpr *e) {
     e->lvalue->accept(this);
     e->ATTR(type) = e->lvalue->ATTR(type);
-    e->ATTR(value)=e->lvalue->value;
+   
 }
 
 /* Visits an ast::VarRef node.
@@ -392,7 +386,7 @@ void SemPass2::visit(ast::AssignExpr *s) {
         return;
 
     } else{
-        ((Variable *)v)->value_v=s->e->ATTR(value);
+        
         if(lin->ldim==NULL){
             
         }
@@ -416,7 +410,7 @@ void SemPass2::visit(ast::VarRef *ref) {
 
     } else {
         ref->ATTR(sym) = (Variable *)v;
-        ref->value=ref->ATTR(sym)->value_v;
+        
         if(ref->ldim==NULL){
             ref->ATTR(type) = v->getType();
 

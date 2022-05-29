@@ -105,7 +105,7 @@ void scan_end();
 %nterm<mind::ast::InitVal*> InitVal InitVals
 /*   SUBSECTION 2.2: associativeness & precedences */
 
-%left     ASSIGN
+%right    ASSIGN
 %right   QUESTION
 %left     OR
 %left     AND
@@ -355,8 +355,7 @@ Expr        : ICONST
                 { $$ = new ast::DivExpr($1, $3, POS(@2)); }
             | Expr MOD Expr %prec MOD
                 { $$ = new ast::ModExpr($1, $3, POS(@2)); }
-            | Expr QUESTION Expr COLON Expr
-                { $$ = new ast::IfExpr($1,$3,$5,POS(@2)); }
+           
             | MINUS Expr  %prec NEG
                 { $$ = new ast::NegExpr($2, POS(@1)); }
 

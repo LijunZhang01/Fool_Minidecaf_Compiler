@@ -144,6 +144,7 @@ void Translation::visit(ast::AssignExpr *s) {
         
     }
     s->ATTR(value) = s->e->ATTR(value);
+    ref->ATTR(sym)->value_v=s->e->ATTR(value);
 }
 
 /* Translating an ast::ExprStmt node.
@@ -450,7 +451,10 @@ void Translation::visit(ast::DivExpr *e) {
     e->e2->accept(this);
 
     e->ATTR(val) = tr->genDiv(e->e1->ATTR(val), e->e2->ATTR(val));
-    e->ATTR(value)=e->e1->ATTR(value)/e->e2->ATTR(value);
+    if(e->e2->ATTR(value)!=0)
+        e->ATTR(value)=e->e1->ATTR(value)/e->e2->ATTR(value);
+    else
+        e->ATTR(value)=1;
 }
 
 
@@ -515,6 +519,7 @@ void Translation::visit(ast::BitNotExpr *e) {
 void Translation::visit(ast::LvalueExpr *e) {
     // TODO
     e->lvalue->accept(this);
+    
     switch (e->lvalue->getKind()) {
         case ast::ASTNode::VAR_REF:{
             ast::VarRef *ref = (ast::VarRef *)e->lvalue;
@@ -550,6 +555,9 @@ void Translation::visit(ast::LvalueExpr *e) {
                 else 
                     e->ATTR(val) = ref->ATTR(sym)->getTemp();
             }
+            
+            e->ATTR(value)=ref->ATTR(sym)->value_v;
+
             break;
         }
         default:
