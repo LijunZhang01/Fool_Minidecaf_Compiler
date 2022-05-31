@@ -90,6 +90,7 @@ struct Tac {
         JUMP,
         JZERO,
         PUSH,
+        PUSH1,
         POP,
         RETURN,
         LOAD_IMM4,
@@ -147,6 +148,7 @@ struct Tac {
     static Tac *JZero(Label dest, Temp cond);
     static Tac *Pop(Temp dest);
     static Tac *Push(Temp src);
+    static Tac *Push1(Temp src);
     static Tac *Return(Temp value);
     static Tac *Mark(Label label);
     static Tac *Memo(const char *);

@@ -318,7 +318,10 @@ void RiscvDesc::emitTac(Tac *t) {
         //顺序原因，什么都不做。emitCallTac会进行调用emitPush调用
         emitPushTac(t);
         break;
-
+    case Tac::PUSH1:
+        //顺序原因，什么都不做。emitCallTac会进行调用emitPush调用
+        emitPushTac1(t);
+        break;
     case Tac::LOAD_IMM4:
         emitLoadImm4Tac(t);
         break;
@@ -542,12 +545,18 @@ void RiscvDesc::emitCallTac(RiscvInstr::OpCode op,Tac *t) {
 
 //参数入栈
 void RiscvDesc::emitPushTac(Tac *t) {
+    
     int r1 = getRegForRead(t->op0.var, 0, t->LiveOut);
     addInstr(RiscvInstr::ADDI, _reg[RiscvReg::SP], _reg[RiscvReg::SP], NULL, -4, EMPTY_STR, NULL);
     addInstr(RiscvInstr::SW,  _reg[r1], _reg[RiscvReg::SP], NULL, 0, EMPTY_STR, NULL);
     //canlian.push_front(*t);
 }
-
+void RiscvDesc::emitPushTac1(Tac *t) {
+    int r1 = getRegForRead(t->op0.var, 0, t->LiveOut);
+    // addInstr(RiscvInstr::ADDI, _reg[RiscvReg::SP], _reg[RiscvReg::SP], NULL, -4, EMPTY_STR, NULL);
+    // addInstr(RiscvInstr::SW,  _reg[r1], _reg[RiscvReg::SP], NULL, 0, EMPTY_STR, NULL);
+    addInstr(RiscvInstr::MOVE,  _reg[RiscvReg::A0], _reg[r1], NULL, 0, EMPTY_STR, NULL);
+}
 /* Translates a Unary TAC into Riscv instructions.
  *
  * PARAMETERS:
@@ -943,7 +952,7 @@ void RiscvDesc::simplePeephole(RiscvInstr *iseq) {
  */
 int RiscvDesc::getRegForRead(Temp v, int avoid1, LiveSet *live) {
     std::ostringstream oss;
-
+    
     int i = lookupReg(v);
 
     if (i < 0) {

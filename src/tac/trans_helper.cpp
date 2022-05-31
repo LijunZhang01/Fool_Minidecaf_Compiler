@@ -442,6 +442,8 @@ Temp TransHelper::genCall(Label label) {
  */
 void TransHelper::genPush(Temp src) { chainUp(Tac::Push(src)); }
 
+void TransHelper::genPush1(Temp src) { chainUp(Tac::Push1(src)); }
+
 /* Appends a Jump tac node to the current list.
  *
  * PARAMETERS:

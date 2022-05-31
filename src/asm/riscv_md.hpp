@@ -176,6 +176,7 @@ class RiscvDesc : public MachineDesc {
     void emitAllocTac(tac::Tac *t);
     void emitCallTac(RiscvInstr::OpCode, tac::Tac *);
     void emitPushTac(tac::Tac *);
+    void emitPushTac1(tac::Tac *);
     void emitLaTac(RiscvInstr::OpCode,tac::Tac *t);
     void emitLwTac(RiscvInstr::OpCode,tac::Tac *t);
     void emitSwTac(RiscvInstr::OpCode,tac::Tac *t);

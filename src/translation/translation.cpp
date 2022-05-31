@@ -579,17 +579,31 @@ void Translation::visit(ast::LvalueExpr *e) {
 
 
 void Translation::visit(ast::CallExpr *e) {
-
+    std::string a="putint";
+    std::string b="putch";
+    if(e->name==a||e->name==b){
+        for(auto expr : *(e->elist)){
+            // std::cout<<((ast::LvalueExpr *)expr)->ATTR(value);
+            expr->accept(this); 
+            assert(expr->ATTR(val) != NULL);
+            tr->genPush1(expr->ATTR(val));
+        }
+        e->ATTR(val) = tr->genCall(e->ATTR(sym)->getEntryLabel());
+        assert(e->ATTR(val) != NULL);
+    }
+    else{
+        for(auto expr : *(e->elist)){
+            // std::cout<<((ast::LvalueExpr *)expr)->ATTR(value);
+            expr->accept(this); 
+            assert(expr->ATTR(val) != NULL);
+            tr->genPush(expr->ATTR(val));
+        }
+        e->ATTR(val) = tr->genCall(e->ATTR(sym)->getEntryLabel());
+        assert(e->ATTR(val) != NULL);
+    }
 
     
-    for(auto expr : *(e->elist)){
-        // std::cout<<((ast::LvalueExpr *)expr)->ATTR(value);
-        expr->accept(this); 
-        assert(expr->ATTR(val) != NULL);
-        tr->genPush(expr->ATTR(val));
-    }
-    e->ATTR(val) = tr->genCall(e->ATTR(sym)->getEntryLabel());
-    assert(e->ATTR(val) != NULL);
+    
 }
 
 /* Translating an ast::VarRef node.

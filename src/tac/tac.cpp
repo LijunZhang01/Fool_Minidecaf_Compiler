@@ -573,6 +573,15 @@ Tac *Tac::Push(Temp src) {
     return t;
 }
 
+Tac *Tac::Push1(Temp src) {
+    REQUIRE_I4(src);
+
+    Tac *t = allocateNewTac(Tac::PUSH1);
+    t->op0.var = src;
+
+    return t;
+}
+
 Tac *Tac::Call(Temp src,Label label) {
     REQUIRE_I4(src);
 
@@ -802,7 +811,9 @@ void Tac::dump(std::ostream &os) {
     case PUSH:
         os << "    push   " << op0.var;
         break;
-
+    case PUSH1:
+        os << "    push1   " << op0.var;
+        break;
     case POP:
         if (NULL != op0.var)
             os << "    " << op0.var << " <- pop()";
