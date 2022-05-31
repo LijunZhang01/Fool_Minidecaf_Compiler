@@ -53,10 +53,15 @@ YY_DECL;
 /* SECTION II: macro definition */
 NEWLINE       (\r|\n|\r\n)
 WHITESPACE    ([ \t]+)
-INTEGER       ([0-9]+)
 IDENTIFIER    ([A-Za-z][_0-9A-Za-z]*)
+
+INTEGER       [1-9]([0-9]*)
 HINTEGER     0[xX][0-9a-fA-F]+
-DINTEGER     0[0-7]+
+DINTEGER     0[0-7]*
+
+
+ // digit  [0-9]
+
 
 /* SECTION III: matching rules (and actions) */
 %x B C

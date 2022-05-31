@@ -465,7 +465,10 @@ void Translation::visit(ast::ModExpr *e) {
     e->e2->accept(this);
 
     e->ATTR(val) = tr->genMod(e->e1->ATTR(val), e->e2->ATTR(val));
-    e->ATTR(value)=e->e1->ATTR(value)%e->e2->ATTR(value);
+    if(e->e2->ATTR(value)!=0)
+        e->ATTR(value)=e->e1->ATTR(value)%e->e2->ATTR(value);
+    else
+        e->ATTR(value)=1;
 }
 
 
@@ -523,37 +526,46 @@ void Translation::visit(ast::LvalueExpr *e) {
     switch (e->lvalue->getKind()) {
         case ast::ASTNode::VAR_REF:{
             ast::VarRef *ref = (ast::VarRef *)e->lvalue;
-            // if(ref->ATTR(sym)->iscon){
-            //     e->ATTR(val) = tr->genLoad(temp, 0);
-            // }
             if(ref->ATTR(sym)->isGlobalVar()){
-                Temp temp = tr->genLoadSymbol(ref->ATTR(sym)->getName());
-                if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAY_ELE)
+                // if(ref->ATTR(sym)->iscon){
+                //     e->ATTR(val) = tr->genLoadImm4(ref->ATTR(sym)->value_v);
+                // }
+                // else{
+                    Temp temp = tr->genLoadSymbol(ref->ATTR(sym)->getName());
+                    if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAY_ELE)
                     temp = tr->genAdd(temp, ref->ldim->ATTR(val));
-                e->ATTR(val) = tr->genLoad(temp, 0);
-                if(ref->ATTR(sym)->iscon){
-                    e->ATTR(value) = ref->ATTR(sym)->con_val;
-                }
-                else{
-                    scope::Scope *scop_temp=ref->ATTR(sym)->getScope();
-                    int jiji=0;
-                    for(auto item=scop_temp->begin();item!=scop_temp->end();item++){
-                        if((*item)->getName()==ref->var)
-                        {
-                            e->ATTR(value)=(dynamic_cast<mind::symb::Variable *>(*item))->getGlobalInit();
-                            jiji=1;
-                        }
-                    }
-                    if(jiji==0) mind_assert(false);
-                }
+                    e->ATTR(val) = tr->genLoad(temp, 0);
+                
+                
+                // if(ref->ATTR(sym)->iscon){
+                //     e->ATTR(value) = ref->ATTR(sym)->con_val;
+                // }
+                // else{
+                //     scope::Scope *scop_temp=ref->ATTR(sym)->getScope();
+                //     int jiji=0;
+                //     for(auto item=scop_temp->begin();item!=scop_temp->end();item++){
+                //         if((*item)->getName()==ref->var)
+                //         {
+                //             e->ATTR(value)=(dynamic_cast<mind::symb::Variable *>(*item))->getGlobalInit();
+                //             jiji=1;
+                //         }
+                //     }
+                //     if(jiji==0) mind_assert(false);
+                // }
             }
             else {
-                if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAY_ELE){
-                    Temp temp = tr->genAdd(ref->ATTR(sym)->getTemp(), ref->ldim->ATTR(val));
-                    e->ATTR(val) = tr->genLoad(temp, 0);
+                if(ref->ATTR(sym)->iscon){
+                    e->ATTR(val) = tr->genLoadImm4(ref->ATTR(sym)->value_v);
                 }
-                else 
-                    e->ATTR(val) = ref->ATTR(sym)->getTemp();
+                else{
+                    if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAY_ELE){
+                        Temp temp = tr->genAdd(ref->ATTR(sym)->getTemp(), ref->ldim->ATTR(val));
+                        e->ATTR(val) = tr->genLoad(temp, 0);
+                    }
+                    else 
+                        e->ATTR(val) = ref->ATTR(sym)->getTemp();
+                }
+                
             }
             
             e->ATTR(value)=ref->ATTR(sym)->value_v;
@@ -621,31 +633,7 @@ void Translation::visit(ast::VarRef *ref) {
 /* Translating an ast::VarDecl node.
  */
 void Translation::visit(ast::VarDecl *decl) {
-    // TODO
-    //具体步骤就是先为这个变量的左值分配一个Temp，若在变量的定义中发现他拥有赋值的操作，那就应该生成Assign语句的
-    //三元表达式
-    // if(decl->const1){
-    //     if(decl->ATTR(sym)->isGlobalVar()){
-    //         if(decl->type->ATTR(type)->isArrayType()){
-
-    //         }
-    //         else{
-    //             decl->ATTR(sym)->con_val=decl->init->ATTR(value);
-    //         }
-    //     }
-    //     else{
-    //         if(decl->type->ATTR(type)->isArrayType()){
-
-    //         }
-    //         else{
-    //             decl->ATTR(sym)->con_val=decl->init->ATTR(value);
-    //         }
-    //     }
-        
-    // }
-    // else{
-
-    // }
+    
     if(decl->ATTR(sym)->isGlobalVar()){
         if(decl->type->ATTR(type)->isArrayType()){
             // if(decl->ATTR(sym)->rdim==NULL){
@@ -670,9 +658,11 @@ void Translation::visit(ast::VarDecl *decl) {
             // }
         }
         else{
-            //为全局变量赋初值
+            
             if(decl->init==NULL){
                 decl->ATTR(sym)->setGlobalInit(0);
+                decl->ATTR(sym)->value_v=0;
+                
             }
             else{
                 //decl->ATTR(sym)->setGlobalInit(0);
@@ -681,12 +671,14 @@ void Translation::visit(ast::VarDecl *decl) {
                 if(decl->init->getKind() == ast::ASTNode::INT_CONST)
                 {
                     decl->ATTR(sym)->setGlobalInit(((ast::IntConst *)(decl->init))->value);
+                    decl->ATTR(sym)->value_v=((ast::IntConst *)(decl->init))->value;
                 }
                 else if(decl->init->getKind() == ast::ASTNode::CALL_EXPR){
                     assert(decl->init->getKind() == ast::ASTNode::INT_CONST);
                 }
                 else {
                     decl->ATTR(sym)->setGlobalInit(decl->init->ATTR(value));
+                    decl->ATTR(sym)->value_v=decl->init->ATTR(value);
                 }
                 // assert(decl->init->getKind() == ast::ASTNode::INT_CONST);
                 // decl->ATTR(sym)->setGlobalInit(((ast::IntConst *)(decl->init))->value);
@@ -714,6 +706,7 @@ void Translation::visit(ast::VarDecl *decl) {
             decl->ATTR(sym)->attachTemp(tr->getNewTempI4());
             if(decl->init!=NULL){
                 decl->init->accept(this);
+                decl->ATTR(sym)->value_v=decl->init->ATTR(value);
                 tr->genAssign(decl->ATTR(sym)->getTemp(),decl->init->ATTR(val));
             }
         }
