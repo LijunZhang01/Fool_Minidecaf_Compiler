@@ -101,9 +101,9 @@ static bool isErrorType(Type *t) { return t->equal(BaseType::Error); }
  *   Unexpected Type Error may be issued
  */
 static void expect(ast::Expr *e, Type *t) {
-    if (!e->ATTR(type)->equal(t) && !isErrorType(e->ATTR(type))) {
-        issue(e->getLocation(), new UnexpectedTypeError(t, e->ATTR(type)));
-    }
+    // if (!e->ATTR(type)->equal(t) && !isErrorType(e->ATTR(type))) {
+    //     issue(e->getLocation(), new UnexpectedTypeError(t, e->ATTR(type)));
+    // }
 }
 
 /* Visits an ast::IntConst node.
@@ -420,12 +420,13 @@ void SemPass2::visit(ast::VarRef *ref) {
         }
         else{
             ref->ldim->accept(this);
-            if(ref->ldim->ATTR(dim1)->length()!=((ArrayType *)v->getType())->getDim())
-                goto issue_error_type;
-            for(auto it=ref->ldim->ATTR(dim1)->begin(),mt=((Variable *)v)->dim->begin();it!=ref->ldim->ATTR(dim1)->end();it++){
-                if((*it)>=(*mt)) goto issue_error_type;
-                mt++;
-            }
+            // if(ref->ldim->ATTR(dim1)->length()!=((ArrayType *)v->getType())->getDim())
+            //     goto issue_error_type;
+            // for(auto it=ref->ldim->ATTR(dim1)->begin(),mt=((Variable *)v)->dim->begin();it!=ref->ldim->ATTR(dim1)->end();it++){
+            //     if((*it)>=(*mt)) goto issue_error_type;
+            //     mt++;
+            // }
+            // ref->ATTR(type) =v->getType();
             ref->ATTR(type) = ((ArrayType *)v->getType())->getElementType();
             ref->ldim->ATTR(dim) = ref->ATTR(sym)->getDimList();
             ref->ATTR(lv_kind) = ast::Lvalue::ARRAY_ELE;
@@ -556,7 +557,7 @@ void SemPass2::visit(ast::IfStmt *s) {
     s->condition->accept(this);
     if (!s->condition->ATTR(type)->equal(BaseType::Int)) {
         issue(s->condition->getLocation(), new BadTestExprError());
-        ;
+        
     }
 
     s->true_brch->accept(this);

@@ -11,7 +11,7 @@
  *
  *  Keltin Leung 
  */
-
+#include <iostream>
 #include "ast/ast.hpp"
 #include "ast/visitor.hpp"
 #include "compiler.hpp"
@@ -23,6 +23,8 @@
 #include "3rdparty/list.hpp"
 // #include<iostream>
 #include "list"
+#include <map>
+#include "define.hpp"
 // #include "define.hpp"
 
 using namespace mind;
@@ -31,7 +33,9 @@ using namespace mind::symb;
 using namespace mind::type;
 using namespace mind::err;
 
+std::map<std::string,int> conv;
 std::list <mind::symb::Function *> mind::aa;
+bool con_b=false;
 // mind::util::List<mind::symb::Function *> aa=*(new std::list<mind::symb::Function *>());
 /* Pass 1 of the semantic analysis.
  */
@@ -50,10 +54,10 @@ class SemPass1 : public ast::Visitor {
     virtual void visit(ast::VarDecl *);
     // visiting types
     virtual void visit(ast::IntType *);
-    // virtual void visit(ast::IndexExpr *e);
-    // virtual void visit(ast::AddExpr *e) ;
-    // virtual void visit(ast::SubExpr *e) ;
-    // virtual void visit(ast::MulExpr *e) ;
+    virtual void visit(ast::IndexExpr *e);
+    virtual void visit(ast::AddExpr *e) ;
+    virtual void visit(ast::SubExpr *e) ;
+    virtual void visit(ast::MulExpr *e) ;
     // virtual void visit(ast::LesExpr *e) ;
     // virtual void visit(ast::GrtExpr *e) ;
     // virtual void visit(ast::LeqExpr *e) ;
@@ -64,11 +68,11 @@ class SemPass1 : public ast::Visitor {
     // virtual void visit(ast::OrExpr *e) ;
     // virtual void visit(ast::DivExpr *e) ;
     // virtual void visit(ast::ModExpr *e) ;
-    // virtual void visit(ast::IntConst *e) ;
+    virtual void visit(ast::IntConst *e) ;
     // virtual void visit(ast::NegExpr *e) ;
     // virtual void visit(ast::NotExpr *e) ;
     // virtual void visit(ast::BitNotExpr *e) ;
-    // virtual void visit(ast::LvalueExpr *e) ;
+    virtual void visit(ast::LvalueExpr *e) ;
     // virtual void visit(ast::VarRef *ref) ;
 };
 
@@ -257,36 +261,42 @@ void SemPass1::visit(ast::VarDecl *vdecl) {
     vdecl->type->accept(this);
     
     
-    // if(vdecl->ldim!=NULL){
-    //     vdecl->ldim->accept(this);
-    //     int length = 1;
-    //     for(int d : *(vdecl->ldim->ATTR(dim1))){
-    //         length *= d;
-    //     }
-    //     if(length == 0){
-    //         issue(vdecl->getLocation(), new ZeroLengthedArrayError());
-    //         return ;
-    //     }
-    //     int d=vdecl->ldim->ATTR(dim1)->length();
-    //     vdecl->type->ATTR(type) = new ArrayType(vdecl->type->ATTR(type), length,d);
-    // }
-
-    if(vdecl->ldim != NULL) {
+    if(vdecl->ldim!=NULL){
+        con_b=true;
+        vdecl->ldim->accept(this);
         int length = 1;
-        for(int d : *(vdecl->ldim)){
+        for(int d : *(vdecl->ldim->ATTR(dim1))){
             length *= d;
         }
         if(length == 0){
             issue(vdecl->getLocation(), new ZeroLengthedArrayError());
             return ;
         }
-        int d=vdecl->ldim->length();
+        int d=vdecl->ldim->ATTR(dim1)->length();
         vdecl->type->ATTR(type) = new ArrayType(vdecl->type->ATTR(type), length,d);
     }
+    con_b=false;
+    // if(vdecl->ldim != NULL) {
+    //     int length = 1;
+    //     for(int d : *(vdecl->ldim)){
+    //         length *= d;
+    //     }
+    //     if(length == 0){
+    //         issue(vdecl->getLocation(), new ZeroLengthedArrayError());
+    //         return ;
+    //     }
+    //     int d=vdecl->ldim->length();
+    //     vdecl->type->ATTR(type) = new ArrayType(vdecl->type->ATTR(type), length,d);
+    // }
 
+    
+    if(vdecl->can){
+        // ast::DimList *a=new ast::DimList();
+        vdecl->type->ATTR(type) = new ArrayType(vdecl->type->ATTR(type), 10,1);
+        // Type *mm=new ArrayType(vdecl->type->ATTR(type), 10,1);
+        // v=new Variable(vdecl->name, mm, NULL,NULL,con,vdecl->getLocation());
+    }
     t = vdecl->type->ATTR(type);
-    
-    
     // TODO: Add a new symbol to a scope
     // 1. Create a new `Variable` symbol
     // 2. Check for conflict in `scopes`, which is a global variable refering to
@@ -299,17 +309,24 @@ void SemPass1::visit(ast::VarDecl *vdecl) {
     if(vdecl->ldim==NULL){
         v=new Variable(vdecl->name, t,NULL,vdecl->rdim,con,vdecl->getLocation());
     }
+    
     else{
-        v=new Variable(vdecl->name, t, vdecl->ldim,vdecl->rdim,con,vdecl->getLocation());
+        v=new Variable(vdecl->name, t, vdecl->ldim->ATTR(dim1),vdecl->rdim,con,vdecl->getLocation());
     }
     // Variable *v=new Variable(vdecl->name, t, vdecl->ldim->ATTR(dim1),vdecl->rdim,con,vdecl->getLocation());
-    // if(con){
-    //     if(vdecl->init!=NULL){
-    //         vdecl->init->accept(this);
-    //         v->con_val=vdecl->init->ATTR(value);
-    //     }
+    if(con){
+        if(vdecl->init!=NULL){
+            con_b=true;
+            vdecl->init->accept(this);
+            conv[vdecl->name]=vdecl->init->ATTR(con_v);
+        }
+        con_b=false;
+    }
+    if(vdecl->can){
+        // ast::DimList *a=new ast::DimList();
         
-    // }
+        v=new Variable(vdecl->name, t, NULL,NULL,con,vdecl->getLocation());
+    }
     vdecl->ATTR(sym) = v;
     Symbol *sym = scopes->lookup(vdecl->name, vdecl->getLocation(), 0);
     if(sym != NULL)
@@ -347,12 +364,58 @@ void MindCompiler::buildSymbols(ast::Program *tree) {
 }
 
 
+void SemPass1::visit(ast::IndexExpr *e) {
+    e->ATTR(dim1)=new ast::DimList();
+    for(auto c : *(e->expr_list)){
+        c->accept(this);
+        e->ATTR(dim1)->append(c->ATTR(con_v));
+        
+    }
+        
+}
 
 
+void SemPass1::visit(ast::IntConst *e) {
+    e->ATTR(con_v)=e->value;
+}
+
+void SemPass1::visit(ast::AddExpr *e) {
+    if(con_b){
+        e->e1->accept(this);
+        e->e2->accept(this);
+        e->ATTR(con_v)=e->e1->ATTR(con_v)+e->e2->ATTR(con_v);
+    }
+    
+}
+
+void SemPass1::visit(ast::SubExpr *e) {
+    if(con_b){
+        e->e1->accept(this);
+        e->e2->accept(this);
+
+        e->ATTR(con_v)=e->e1->ATTR(con_v)-e->e2->ATTR(con_v);
+    }
+    
+}
 
 
+void SemPass1::visit(ast::MulExpr *e) {
+    if(con_b){
+        e->e1->accept(this);
+        e->e2->accept(this);
+        e->ATTR(con_v)=e->e1->ATTR(con_v)*e->e2->ATTR(con_v);
+    }
+    
+}
 
 
+void SemPass1::visit(ast::LvalueExpr *e){
+    if(con_b){
+        std::string temp=((ast::VarRef *)e->lvalue)->var;
+        e->ATTR(con_v)=conv[temp];
+    }
+    
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////

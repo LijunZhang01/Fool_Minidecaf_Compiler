@@ -614,21 +614,36 @@ void Translation::visit(ast::CallExpr *e) {
  */
 
 void Translation::visit(ast::IndexExpr *e){
-    mind_assert(e->expr_list->length() == e->ATTR(dim)->length());
-    auto expr = e->expr_list->begin();
-    auto dim = e->ATTR(dim)->begin();
-    (*expr)->accept(this);
-    Temp temp = (*expr)->ATTR(val); ++expr;
-    for(int i = 1; i < e->expr_list->length(); ++expr, ++dim, ++i){
+    
+    if(e->ATTR(dim)!=NULL){
+        mind_assert(e->expr_list->length() == e->ATTR(dim)->length());
+        auto expr = e->expr_list->begin();
+        auto dim = e->ATTR(dim)->begin();
+        
         (*expr)->accept(this);
-        //printf("<%d>", *dim);
-        Temp t = tr->genLoadImm4(*dim);
+        Temp temp = (*expr)->ATTR(val); ++expr;
+        for(int i = 1; i < e->expr_list->length(); ++expr, ++dim, ++i){
+            (*expr)->accept(this);
+            //printf("<%d>", *dim);
+            Temp t = tr->genLoadImm4(*dim);
+            temp = tr->genMul(temp, t);
+            temp = tr->genAdd(temp, (*expr)->ATTR(val));
+        }
+        Temp t = tr->genLoadImm4(4);
         temp = tr->genMul(temp, t);
-        temp = tr->genAdd(temp, (*expr)->ATTR(val));
+        e->ATTR(val) = temp;
     }
-    Temp t = tr->genLoadImm4(4);
-    temp = tr->genMul(temp, t);
-    e->ATTR(val) = temp;
+    else{
+        
+        auto expr = e->expr_list->begin();
+        
+        
+        (*expr)->accept(this);
+        Temp temp = (*expr)->ATTR(val); ++expr;
+        Temp t = tr->genLoadImm4(4);
+        temp = tr->genMul(temp, t);
+        e->ATTR(val) = temp;
+    }
 }
 void Translation::visit(ast::VarRef *ref) {
     switch (ref->ATTR(lv_kind)) {
@@ -703,7 +718,7 @@ void Translation::visit(ast::VarDecl *decl) {
     }
     else{
         if(decl->type->ATTR(type)->isArrayType()){
-            //printf("[%d]\n", decl->type->ATTR(type)->getSize());
+            
             decl->ATTR(sym)->attachTemp(tr->allocNewTempI4(decl->type->ATTR(type)->getSize()));
             if(decl->rdim!=NULL){
                 int a=0;
