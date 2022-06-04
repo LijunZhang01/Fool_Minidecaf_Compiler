@@ -36,6 +36,7 @@ using namespace mind::err;
 std::map<std::string,int> conv;
 std::list <mind::symb::Function *> mind::aa;
 bool con_b=false;
+int mind::han=1;
 // mind::util::List<mind::symb::Function *> aa=*(new std::list<mind::symb::Function *>());
 /* Pass 1 of the semantic analysis.
  */
@@ -122,7 +123,8 @@ void SemPass1::visit(ast::FuncDefn *fdef) {
 
     Function *f = new Function(fdef->name, t , fdef->getLocation());
 
-    if(fdef->name=="main"){
+    if(mind::han==1){
+        mind::han=0;
         // mind::FList *aa=new mind::FList();
         Function *f1 = new Function("getint", t, fdef->getLocation());
         scopes->declare(f1);

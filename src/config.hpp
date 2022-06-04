@@ -18,6 +18,7 @@
 #ifndef __MIND_CONFIG__
 #define __MIND_CONFIG__
 
+#include<iostream>
 #include "3rdparty/boehmgc.hpp"
 #include "define.hpp"
 #include "error.hpp"
@@ -35,6 +36,7 @@ extern ast::Type *quanju;
 extern std::list<mind::tac::Tac> canlian ;
 // extern std::list<mind::symb::Function> aa ;
 extern std::list<mind::symb::Function *> aa;
+extern int han;
 
 /* Output Functions */
 std::ostream &operator<<(std::ostream &, Location *);
