@@ -1,11 +1,12 @@
-int sum(int a[]){
-    return a[2];
-}
+const int N = -1;
+int arr[N + 2 * 4 - 99 / 99] = {1, 2, 33, 4, 5, 6};
 
-int main()
-{
-    int a[4]={1,2,3,4};
-    int c=sum(a);
-    return c;
-    
+int main() {
+  int i = 0, sum = 0;
+  while (i < 6) {
+    sum = sum + arr[i];
+    i = i + 1;
+  }
+  
+  return sum;
 }

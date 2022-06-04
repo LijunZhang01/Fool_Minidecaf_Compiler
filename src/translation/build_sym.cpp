@@ -66,10 +66,10 @@ class SemPass1 : public ast::Visitor {
     // virtual void visit(ast::NeqExpr *e) ;
     // virtual void visit(ast::AndExpr *e) ;
     // virtual void visit(ast::OrExpr *e) ;
-    // virtual void visit(ast::DivExpr *e) ;
+    virtual void visit(ast::DivExpr *e) ;
     // virtual void visit(ast::ModExpr *e) ;
     virtual void visit(ast::IntConst *e) ;
-    // virtual void visit(ast::NegExpr *e) ;
+    virtual void visit(ast::NegExpr *e) ;
     // virtual void visit(ast::NotExpr *e) ;
     // virtual void visit(ast::BitNotExpr *e) ;
     virtual void visit(ast::LvalueExpr *e) ;
@@ -272,7 +272,9 @@ void SemPass1::visit(ast::VarDecl *vdecl) {
             issue(vdecl->getLocation(), new ZeroLengthedArrayError());
             return ;
         }
+        // std::cout<<length;
         int d=vdecl->ldim->ATTR(dim1)->length();
+        
         vdecl->type->ATTR(type) = new ArrayType(vdecl->type->ATTR(type), length,d);
     }
     con_b=false;
@@ -417,6 +419,20 @@ void SemPass1::visit(ast::LvalueExpr *e){
     
 }
 
+
+void SemPass1::visit(ast::NegExpr *e) {
+    e->e->accept(this);
+
+    e->ATTR(con_v)=-(e->e->ATTR(con_v));
+}
+
+void SemPass1::visit(ast::DivExpr *e) {
+    e->e1->accept(this);
+    e->e2->accept(this);
+
+    
+    e->ATTR(con_v)=e->e1->ATTR(con_v)/e->e2->ATTR(con_v);
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////

@@ -49,6 +49,7 @@ void scan_end();
 
 %define api.token.prefix {TOK_}
 %token
+   VOID "void"
    END  0  "end of file"
    BOOL "bool"
    INT  "int"
@@ -152,7 +153,15 @@ FuncDefn : Type IDENTIFIER LPAREN FormalList RPAREN LBRACE StmtList RBRACE {
           } |
           Type IDENTIFIER LPAREN FormalList RPAREN SEMICOLON{
               $$ = new ast::FuncDefn($2,$1,$4,new ast::EmptyStmt(POS(@6)),POS(@1));
+          } |
+          VOID IDENTIFIER LPAREN FormalList RPAREN LBRACE StmtList RBRACE{
+              $$ = new ast::FuncDefn($2,new ast::IntType(POS(@1)),$4,$7,POS(@1));
+          } |
+          VOID IDENTIFIER LPAREN FormalList RPAREN SEMICOLON{
+              $$ = new ast::FuncDefn($2,new ast::IntType(POS(@1)),$4,new ast::EmptyStmt(POS(@6)),POS(@1));
           }
+          ;
+
 FormalList :  /* EMPTY */
                 {$$ = new ast::VarList();} 
 
@@ -325,6 +334,8 @@ IfStmt      : IF LPAREN Expr RPAREN Stmt
 
 ReturnStmt  : RETURN Expr SEMICOLON
                 { $$ = new ast::ReturnStmt($2, POS(@1)); }
+            | RETURN SEMICOLON
+                { $$ = new ast::ReturnStmt( POS(@1)); }
             ;
 ExprStmt    : Expr SEMICOLON
                 { $$ = new ast::ExprStmt($1, POS(@1)); } 

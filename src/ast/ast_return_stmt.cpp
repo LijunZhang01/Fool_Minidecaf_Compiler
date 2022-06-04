@@ -25,7 +25,12 @@ ReturnStmt::ReturnStmt(Expr *e0, Location *l) {
 
     e = e0;
 }
+ReturnStmt::ReturnStmt(Location *l) {
 
+    setBasicInfo(RETURN_STMT, l);
+
+    e = new ast::IntConst(3,l);
+}
 /* Visits the current node.
  *
  * PARAMETERS:

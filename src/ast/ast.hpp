@@ -352,7 +352,7 @@ class AssignExpr : public Expr {
 class ReturnStmt : public Statement {
   public:
     ReturnStmt(Expr *e, Location *l);
-
+    ReturnStmt(Location *l);
     virtual void accept(Visitor *);
     virtual void dumpTo(std::ostream &);
 
