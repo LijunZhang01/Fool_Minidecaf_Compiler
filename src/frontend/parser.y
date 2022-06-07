@@ -256,6 +256,11 @@ IndexExpr1   : /* EMPTY */
                   $$ = $4;
                   $$->concate($2);
                 }
+            | LBRACE RBRACE
+                { 
+                  $$ = new ast::DimList();
+                  $$->append_my(0);
+                }
             ;
 
 InitVal:

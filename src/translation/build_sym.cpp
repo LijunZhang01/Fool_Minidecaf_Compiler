@@ -147,6 +147,7 @@ void SemPass1::visit(ast::FuncDefn *fdef) {
         scopes->declare(f5);
         // aa->append_my(f5);
         mind::aa.push_front(f5);
+        f5->appendParameter(new symb::Variable("",t,fdef->getLocation()));
         Function *f6 = new Function("stoptime", t, fdef->getLocation());
         scopes->declare(f6);
         // aa->append_my(f6);

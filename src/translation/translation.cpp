@@ -531,11 +531,41 @@ void Translation::visit(ast::LvalueExpr *e) {
                 //     e->ATTR(val) = tr->genLoadImm4(ref->ATTR(sym)->value_v);
                 // }
                 // else{
+                    // Temp temp = tr->genLoadSymbol(ref->ATTR(sym)->getName());
+                    // if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAY_ELE)
+                    // temp = tr->genAdd(temp, ref->ldim->ATTR(val));
+                    // e->ATTR(val) = tr->genLoad(temp, 0);
+
+
                     Temp temp = tr->genLoadSymbol(ref->ATTR(sym)->getName());
-                    if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAY_ELE)
-                    temp = tr->genAdd(temp, ref->ldim->ATTR(val));
-                    e->ATTR(val) = tr->genLoad(temp, 0);
-                
+                    if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAY_ELE){
+                        temp = tr->genAdd(temp, ref->ldim->ATTR(val));
+                        e->ATTR(val) = tr->genLoad(temp, 0);
+                    }
+                    else{
+                        if(ref->ATTR(type)->isArrayType()){
+                            e->ATTR(val) = temp;
+                        }
+                        else{
+                            e->ATTR(val) = tr->genLoad(temp, 0);
+                        }
+                    }
+                       
+
+                    // if(ref->ATTR(type)->isArrayType())
+                    // {
+                    //     if(ref->ldim==NULL){
+                    //         e->ATTR(val) = temp;
+                    //     }
+                    //     else{
+                    //         temp = tr->genAdd(temp, ref->ldim->ATTR(val));
+                    //         e->ATTR(val) = tr->genLoad(temp, 0);
+                    //     }
+                    // }
+                    // else{
+                    //     // temp = tr->genAdd(temp, ref->ldim->ATTR(val));
+                    //     e->ATTR(val) = tr->genLoad(temp, 0);
+                    // }
                 
                 // if(ref->ATTR(sym)->iscon){
                 //     e->ATTR(value) = ref->ATTR(sym)->con_val;
@@ -581,7 +611,9 @@ void Translation::visit(ast::LvalueExpr *e) {
 void Translation::visit(ast::CallExpr *e) {
     std::string a="putint";
     std::string b="putch";
-    if(e->name==a||e->name==b){
+    std::string c="getarray";
+    std::string d="putarray";
+    if(e->name==a||e->name==b||e->name==c||e->name==d){
         for(auto expr : *(e->elist)){
             // std::cout<<((ast::LvalueExpr *)expr)->ATTR(value);
             expr->accept(this); 
@@ -616,15 +648,17 @@ void Translation::visit(ast::CallExpr *e) {
 void Translation::visit(ast::IndexExpr *e){
     
     if(e->ATTR(dim)!=NULL){
-        mind_assert(e->expr_list->length() == e->ATTR(dim)->length());
+        // mind_assert(e->expr_list->length() == e->ATTR(dim)->length());
         auto expr = e->expr_list->begin();
         auto dim = e->ATTR(dim)->begin();
+        
+
         
         (*expr)->accept(this);
         Temp temp = (*expr)->ATTR(val); ++expr;
         for(int i = 1; i < e->expr_list->length(); ++expr, ++dim, ++i){
             (*expr)->accept(this);
-            //printf("<%d>", *dim);
+            // std::cout<<*dim;
             Temp t = tr->genLoadImm4(*dim);
             temp = tr->genMul(temp, t);
             temp = tr->genAdd(temp, (*expr)->ATTR(val));

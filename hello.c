@@ -1,21 +1,12 @@
-int g = 0;
+const int maxn = 18;
+const int mod = 1000000007;
+int dp[4][3][2];
+int ll[200];
+int cns[2];
 
-int func(int n) {
-  g = g + n;
-  putint(g);
-  return g;
-}
-
-int main() {
-  int i;
-  i = getint();
-  if (i > 10 && func(i)) i = 1; else i = 0;
-  i = getint();
-  if (i > 11 && func(i)) i = 1; else i = 0;
-  i = getint();
-  if (i <= 99 || func(i)) i = 1; else i = 0;
-  i = getint();
-  if (i <= 100 || func(i)) i = 1; else i = 0;
-  if (!func(99) && func(100)) i = 1; else i = 0;
-  return 0;
+int main(){
+    int n = 5;
+    int i = 0; 
+    dp[3][2][1] = -1;
+    return 5;
 }

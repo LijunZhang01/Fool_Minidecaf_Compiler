@@ -516,11 +516,14 @@ void RiscvDesc::emitCallTac(RiscvInstr::OpCode op,Tac *t) {
         t->op1.label->str_form=="getarray"||
         t->op1.label->str_form=="putint"||
         t->op1.label->str_form=="putch"||
-        t->op1.label->str_form=="putarray"||
-        t->op1.label->str_form=="starttime"||
-        t->op1.label->str_form=="stoptime"
+        t->op1.label->str_form=="putarray"
     ){
         addInstr(op, NULL, NULL, NULL, 0,  t->op1.label->str_form, NULL);
+    }
+    else if(t->op1.label->str_form=="starttime"||
+        t->op1.label->str_form=="stoptime"
+    ){
+        addInstr(op, NULL, NULL, NULL, 0,  std::string("_sysy_") +t->op1.label->str_form, NULL);
     }
     else{
         addInstr(op, NULL, NULL, NULL, 0, std::string("_") + t->op1.label->str_form, NULL);
@@ -552,10 +555,14 @@ void RiscvDesc::emitPushTac(Tac *t) {
     //canlian.push_front(*t);
 }
 void RiscvDesc::emitPushTac1(Tac *t) {
+
     int r1 = getRegForRead(t->op0.var, 0, t->LiveOut);
     // addInstr(RiscvInstr::ADDI, _reg[RiscvReg::SP], _reg[RiscvReg::SP], NULL, -4, EMPTY_STR, NULL);
     // addInstr(RiscvInstr::SW,  _reg[r1], _reg[RiscvReg::SP], NULL, 0, EMPTY_STR, NULL);
-    addInstr(RiscvInstr::MOVE,  _reg[RiscvReg::A0], _reg[r1], NULL, 0, EMPTY_STR, NULL);
+    if(_reg[RiscvReg::A0]->dirty)
+        addInstr(RiscvInstr::MOVE,  _reg[RiscvReg::A1], _reg[r1], NULL, 0, EMPTY_STR, NULL);
+    else
+        addInstr(RiscvInstr::MOVE,  _reg[RiscvReg::A0], _reg[r1], NULL, 0, EMPTY_STR, NULL);
 }
 /* Translates a Unary TAC into Riscv instructions.
  *
