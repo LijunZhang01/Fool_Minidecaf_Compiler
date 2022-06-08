@@ -252,5 +252,10 @@ void BasicBlock::analyzeLiveness(void) {
                                 // appear inside
             break;
         }
+        if(t->op_code!=Tac::PUSH1&&
+            t->op_code!=Tac::PUSH&&
+            t->op_code!=Tac::STORE&&
+            t->op_code!=Tac::CALL&&
+            t->LiveOut->empty()) t->mark=1;
     }
 }

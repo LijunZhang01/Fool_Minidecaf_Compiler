@@ -291,7 +291,8 @@ void RiscvDesc::emitAllocTac(Tac *t) {
     addInstr(RiscvInstr::MOVE, _reg[r0], _reg[RiscvReg::SP], NULL, 0, EMPTY_STR, NULL);
 }
 void RiscvDesc::emitTac(Tac *t) {
-    std::ostringstream oss;
+    if(t->mark!=1){
+        std::ostringstream oss;
     t->dump(oss);
     addInstr(RiscvInstr::COMMENT, NULL, NULL, NULL, 0, EMPTY_STR, oss.str().c_str() + 4);
 
@@ -397,6 +398,8 @@ void RiscvDesc::emitTac(Tac *t) {
     default:
         mind_assert(false); // should not appear inside a basic block
     }
+    }
+    
 }
 
 /* Translates a LoadImm4 TAC into Riscv instructions.

@@ -651,21 +651,50 @@ void Translation::visit(ast::IndexExpr *e){
         // mind_assert(e->expr_list->length() == e->ATTR(dim)->length());
         auto expr = e->expr_list->begin();
         auto dim = e->ATTR(dim)->begin();
-        
 
-        
-        (*expr)->accept(this);
-        Temp temp = (*expr)->ATTR(val); ++expr;
-        for(int i = 1; i < e->expr_list->length(); ++expr, ++dim, ++i){
+        auto dim1 = e->ATTR(dim)->rbegin();
+        auto lian_di=new ast::DimList();
+        int old;
+        for(int i = 1; i < e->ATTR(dim)->length();--dim1, ++i){
+            
+            if(i==1){
+                old=(*dim1);
+                lian_di->append_my(old);
+                continue;
+            }
+            lian_di->append_my((*dim1)*old);
+            old=(*dim1);
+        }
+
+
+        auto dim2 = lian_di->begin();
+        auto expr1 = e->expr_list->rbegin();
+         (*expr1)->accept(this);
+        // std::cout<<(*expr)->ATTR(value);
+        Temp temp = (*expr1)->ATTR(val); 
+        for(int i = 1; i < e->expr_list->length(); ++expr, ++dim2, ++i){
             (*expr)->accept(this);
-            // std::cout<<*dim;
-            Temp t = tr->genLoadImm4(*dim);
-            temp = tr->genMul(temp, t);
-            temp = tr->genAdd(temp, (*expr)->ATTR(val));
+            Temp t = tr->genLoadImm4(*dim2);
+            Temp temp1 = tr->genMul((*expr)->ATTR(val), t);
+            temp = tr->genAdd(temp, temp1);
         }
         Temp t = tr->genLoadImm4(4);
         temp = tr->genMul(temp, t);
         e->ATTR(val) = temp;
+
+
+        // (*expr)->accept(this);
+        // Temp temp = (*expr)->ATTR(val); ++expr;
+        // for(int i = 1; i < e->expr_list->length(); ++expr, ++dim,++dim1, ++i){
+        //     (*expr)->accept(this);
+            
+        //     Temp t = tr->genLoadImm4(*dim);
+        //     temp = tr->genMul(temp, t);
+        //     temp = tr->genAdd(temp, (*expr)->ATTR(val));
+        // }
+        // Temp t = tr->genLoadImm4(4);
+        // temp = tr->genMul(temp, t);
+        // e->ATTR(val) = temp;
     }
     else{
         

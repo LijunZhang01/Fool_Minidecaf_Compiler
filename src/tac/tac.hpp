@@ -123,7 +123,7 @@ struct Tac {
 
     int bb_num; // basic block number, for dataflow analysis
     util::Set<Temp> *LiveOut; // for dataflow analysis: LiveOut set of this TAC
-    int mark;   // auxiliary: do anything you want
+    int mark=0;   // auxiliary: do anything you want
 
     // static creation methods for TACs. (see: TransHelper)
     static Tac *Add(Temp dest, Temp op1, Temp op2);
