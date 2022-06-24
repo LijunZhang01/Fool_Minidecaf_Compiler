@@ -14,7 +14,7 @@
 #include "3rdparty/vector.hpp"
 #include "asm/mach_desc.hpp"
 #include "define.hpp"
-
+#include<set>
 #include <iostream>
 
 namespace mind {
@@ -47,7 +47,8 @@ struct BasicBlock {
                  //  of condition = 0, while next[1] is the successor
                  //  of condition = 1;
                  // for END-BY-JUMP blocks, next[0]=next[1]=successor
-
+    int per[100];
+    int num_prv;
     bool cancelled; // internal flag for FlowGraph
     int mark;       // internal flag for MachDesc
 
@@ -61,18 +62,39 @@ struct BasicBlock {
     util::Set<Temp> *LiveIn; // the LiveIn set: all variables alive at the entry
     util::Set<Temp> *LiveOut; // the LiveOut set: all variables alive at the exit
 
+    //公共表达式的编写
+    // util::Set<Rhs> *CEOut;
+    // util::Set<Rhs> *CEIn;
+    // util::Set<Rhs> *Gen;
+    // util::Set<Temp> *Kill;
+    util::Set<Rhs> *CEOut;
+    util::Set<Rhs> *CEIn;
+    util::Set<Rhs> *Gen;
+    util::Set<Temp> *Kill;
     // constructor
     BasicBlock();
     // computes the DEF set and LiveUse set
     void computeDefAndLiveUse(void); // in tac/dataflow.cpp
+
+
+    void AddAll(util::Set<Rhs> *,util::Set<Rhs> *);
+
+    void computeGenAndKill();
     // computes the LiveOut set of every TAC inside (see also:
     // FlowGraph::analyzeLiveness)
     void analyzeLiveness(void); // in tac/dataflow.cpp
+
+
+    void analyzeCOMMEXPRLiveness(void);
     // prints this basic block
     void dump(std::ostream &);
 
     void updateLU(Temp);
     void updateDEF(Temp);
+    void updateKill(Temp);
+    void updateGen(std::string op,Temp t1,Temp t2);
+    void differenceFrom1(util::Set<Rhs> *in,util::Set<Temp> *kill);
+    // void updateRemove(Temp v);
 };
 
 /**
@@ -110,7 +132,10 @@ class FlowGraph {
     // gets the end reverse iterator (pointing beyond the first block)
     reverse_iterator rend(void);
     // computes the LiveIn set and the LiveOut set of every basic block
+
     void analyzeLiveness(void); // in tac/dataflow.cpp
+
+    void analyzeCOMMEXPRLiveness(void);
     // prints this graph
     void dump(std::ostream &);
 };
@@ -122,3 +147,5 @@ std::ostream &operator<<(std::ostream &, util::Set<tac::Temp> *);
 } // namespace mind
 
 #endif // __MIND_FLOWGRAPH__
+
+

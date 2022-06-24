@@ -168,6 +168,15 @@ namespace mind {
     	}
 	 }
 
+	 bool find(const _T e) {
+   		 _T* p = std::find(begin(), end(), e);
+
+    	if (p!=end() && *p == e) {
+        	return true;
+    	}
+		return false;
+	 }
+
 	//   void remove(const _T e) {
 	// 	_T* p = std::lower_bound(begin(), end(), e);
 

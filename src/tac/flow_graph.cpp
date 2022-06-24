@@ -62,6 +62,12 @@ BasicBlock::BasicBlock(void) {
     LiveUse = new Set<Temp>(); // empty set
     LiveIn = new Set<Temp>();  // empty set
     LiveOut = new Set<Temp>(); // empty set
+
+
+    CEOut=new Set<Rhs>();
+    CEIn=new Set<Rhs>();
+    Gen=new Set<Rhs>();
+    Kill=new Set<Temp>();
 }
 
 /* Prints the basic block.
@@ -78,7 +84,7 @@ void BasicBlock::dump(std::ostream &os) {
     os << "*   LiveIn  = " << LiveIn << std::endl;
     os << "*   LiveOut = " << LiveOut << std::endl;
 
-    os << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << std::endl;
+    os << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^tacs^^^^^^^" << std::endl;
 
     // prints the tacs
     for (Tac *t = tac_chain; t != NULL; t = t->next)
@@ -275,6 +281,26 @@ FlowGraph *FlowGraph::makeGraph(Functy f) {
 
     gatherBasicBlocks(f->code, g->_bbs);
 
+
+    
+    for (int i = 0; i < g->_n; ++i) {
+        int t=0;
+        switch (g->_bbs[i]->end_kind) {
+        case BasicBlock::BY_JZERO:
+            g->_bbs[g->_bbs[i]->next[1]]->per[t++]=i;
+            g->_bbs[g->_bbs[i]->next[0]]->per[t++]=i;
+            // falls through
+
+        case BasicBlock::BY_JUMP:
+            g->_bbs[g->_bbs[i]->next[0]]->per[t++]=i;
+            break;
+
+        default:
+            break;
+        }
+        g->_bbs[i]->num_prv=t;
+    }
+    
     return g;
 }
 

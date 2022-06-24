@@ -35,6 +35,15 @@ typedef struct TempObject {
     int offset;           // the offset on the stack (relative to fp, see the example)
 } * Temp;
 
+
+
+
+typedef struct RhsObject {
+    std::string op;
+    Temp t1;
+    Temp t2;
+} * Rhs;
+
 /** Representation of a Label.
  *
  *  NOTE: Similar to Temp, define a new Label: Label l = new LabelObject();
@@ -123,6 +132,7 @@ struct Tac {
 
     int bb_num; // basic block number, for dataflow analysis
     util::Set<Temp> *LiveOut; // for dataflow analysis: LiveOut set of this TAC
+    util::Set<Rhs> *CEIn;
     int mark=0;   // auxiliary: do anything you want
 
     // static creation methods for TACs. (see: TransHelper)

@@ -112,10 +112,12 @@ typedef util::List<VarDecl_2 *> DeclList ;
 namespace tac {
 struct LibFunc;
 struct TempObject;
+struct RhsObject;
 struct LabelObject;
 struct VTableObject;
 struct FunctyObject;
 typedef struct TempObject *Temp;
+typedef struct RhsObject *Rhs;
 typedef struct LabelObject *Label;
 typedef struct VTableObject *VTable;
 typedef struct FunctyObject *Functy;
