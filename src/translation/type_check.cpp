@@ -359,6 +359,7 @@ void SemPass2::visit(ast::IndexExpr *e) {
     e->ATTR(dim1)=new ast::DimList();
     for(auto c : *(e->expr_list)){
         c->accept(this);
+
         e->ATTR(dim1)->append(c->ATTR(value));
     }
         

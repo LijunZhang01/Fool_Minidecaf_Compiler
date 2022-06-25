@@ -1,12 +1,8 @@
-const int maxn = 18;
-const int mod = 1000000007;
-int dp[4][3][2];
-int ll[200];
-int cns[2];
+
+int dp[2][2][2][2][2][3];
 
 int main(){
-    int n = 5;
-    int i = 0; 
-    dp[3][2][1] = -1;
-    return 5;
+    dp[0][1][0][0][0][1]=13;
+    dp[1][0][0][0][0][1]=12;
+    return dp[0][1][0][0][0][1];
 }

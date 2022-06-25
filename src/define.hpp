@@ -100,7 +100,8 @@ typedef util::List<FuncDefn *> FuncList;        // list of Function
 typedef util::List<VarDecl *> VarList,DouList;          // list of VarDecl
 typedef util::List<int> DimList;                // list of VarDecl
 typedef util::List<Statement *> StmtList;       // list of Statement
-typedef util::List<Expr *> ExprList;            // list of Expr
+typedef util::List<Expr *> ExprList;  
+typedef util::List<Expr *> DimList1;           // list of Expr
 typedef util::List<ASTNode *> FuncOrGlobalList; // list of Expr
 typedef util::List<VarDecl_2 *> DeclList ;
 

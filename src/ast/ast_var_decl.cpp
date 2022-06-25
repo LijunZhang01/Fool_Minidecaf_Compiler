@@ -100,7 +100,7 @@ VarDecl::VarDecl(std::string a,std::string n, Type *t, Location *l) {
     lian=NULL;
     const1=0;
 }
-VarDecl::VarDecl(std::string n, Type *t, IndexExpr * ld,DimList *rd, DouList *li,Location *l) {
+VarDecl::VarDecl(std::string n, Type *t, IndexExpr * ld,DimList1 *rd, DouList *li,Location *l) {
 
     setBasicInfo(VAR_DECL, l);
 
@@ -136,7 +136,7 @@ VarDecl::VarDecl(std::string n, Type *t, IndexExpr * ld, DouList *li,Location *l
     }
 }
 
-VarDecl::VarDecl(std::string n,IndexExpr *ld,  DimList * rd, Location *l) {
+VarDecl::VarDecl(std::string n,IndexExpr *ld,  DimList1 * rd, Location *l) {
 
     setBasicInfo(VAR_DECL, l);
 
@@ -182,7 +182,7 @@ VarDecl::VarDecl(std::string const1,std::string n, Type *t, Expr *i, DouList *li
 }
 
 
-VarDecl::VarDecl(std::string const1,std::string n, Type *t, IndexExpr * ld,DimList *rd, DouList *li,Location *l) {
+VarDecl::VarDecl(std::string const1,std::string n, Type *t, IndexExpr * ld,DimList1 *rd, DouList *li,Location *l) {
 
     setBasicInfo(VAR_DECL, l);
 

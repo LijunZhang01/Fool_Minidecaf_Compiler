@@ -1,0 +1,179 @@
+          .text                         
+          .data                         
+          .global                       dp
+dp:          .zero                         384
+          .globl main                   
+          .align 2                      
+
+          .text                         
+main:                                   # function entry
+          sw    ra, -4(sp)              
+          sw    fp, -8(sp)              
+          mv    fp, sp                  
+          addi  sp, sp, -8              
+__LL0:                                  
+                                  # ý
+          li    t0, 1                   
+                                  # ý
+          li    t1, 0                   
+                                  # ý
+          li    t2, 4                   
+                                  # T3 <- (T1 * T2)
+          mul   s1, t1, t2              
+                                  # T4 <- (T0 + T3)
+          add   s2, t0, s1              
+                                  # ý
+          li    s3, 1                   
+                                  # ý
+          li    s4, 4                   
+                                  # T7 <- (T5 * T6)
+          mul   s5, s3, s4              
+                                  # T8 <- (T4 + T7)
+          add   s6, s2, s5              
+                                  # ý
+          li    s7, 0                   
+                                  # ý
+          li    s8, 12                  
+                                  # T11 <- (T9 * T10)
+          mul   s9, s7, s8              
+                                  # T12 <- (T8 + T11)
+          add   s10, s6, s9             
+                                  # ý
+          li    s11, 0                  
+                                  # ý
+          li    t3, 18                  
+                                  # T15 <- (T13 * T14)
+          mul   t4, s11, t3             
+                                  # T16 <- (T12 + T15)
+          add   t5, s10, t4             
+                                  # ý
+          li    t6, 0                   
+                                  # ý
+          li    t0, 3                   
+                                  # T19 <- (T17 * T18)
+          mul   t1, t6, t0              
+                                  # T20 <- (T16 + T19)
+          add   t0, t5, t1              
+                                  # ý
+          li    t1, 4                   
+                                  # T22 <- (T20 * T21)
+          mul   t2, t0, t1              
+                                  # ý
+          li    t0, 13                  
+                                  # T24 <- LOAD_SYMBOL dp
+          la    t1, dp                  
+                                  # T25 <- (T24 + T22)
+          add   s1, t1, t2              
+                                  # STORE T23 -> T25, 0
+          sw    t0, 0(s1)               
+                                  # ý
+          li    t0, 1                   
+                                  # ý
+          li    t1, 1                   
+                                  # ý
+          li    t2, 4                   
+                                  # T29 <- (T27 * T28)
+          mul   s1, t1, t2              
+                                  # T30 <- (T26 + T29)
+          add   t1, t0, s1              
+                                  # ý
+          li    t0, 0                   
+                                  # ý
+          li    t2, 4                   
+                                  # T33 <- (T31 * T32)
+          mul   s1, t0, t2              
+                                  # T34 <- (T30 + T33)
+          add   t0, t1, s1              
+                                  # ý
+          li    t1, 0                   
+                                  # ý
+          li    t2, 12                  
+                                  # T37 <- (T35 * T36)
+          mul   s1, t1, t2              
+                                  # T38 <- (T34 + T37)
+          add   t1, t0, s1              
+                                  # ý
+          li    t0, 0                   
+                                  # ý
+          li    t2, 18                  
+                                  # T41 <- (T39 * T40)
+          mul   s1, t0, t2              
+                                  # T42 <- (T38 + T41)
+          add   t0, t1, s1              
+                                  # ý
+          li    t1, 0                   
+                                  # ý
+          li    t2, 3                   
+                                  # T45 <- (T43 * T44)
+          mul   s1, t1, t2              
+                                  # T46 <- (T42 + T45)
+          add   t1, t0, s1              
+                                  # ý
+          li    t0, 4                   
+                                  # T48 <- (T46 * T47)
+          mul   t2, t1, t0              
+                                  # ý
+          li    t0, 12                  
+                                  # T50 <- LOAD_SYMBOL dp
+          la    t1, dp                  
+                                  # T51 <- (T50 + T48)
+          add   s1, t1, t2              
+                                  # STORE T49 -> T51, 0
+          sw    t0, 0(s1)               
+                                  # ý
+          li    t0, 1                   
+                                  # ý
+          li    t1, 0                   
+                                  # ý
+          li    t2, 4                   
+                                  # T55 <- (T53 * T54)
+          mul   s1, t1, t2              
+                                  # T56 <- (T52 + T55)
+          add   t1, t0, s1              
+                                  # ý
+          li    t0, 1                   
+                                  # ý
+          li    t2, 4                   
+                                  # T59 <- (T57 * T58)
+          mul   s1, t0, t2              
+                                  # T60 <- (T56 + T59)
+          add   t0, t1, s1              
+                                  # ý
+          li    t1, 0                   
+                                  # ý
+          li    t2, 12                  
+                                  # T63 <- (T61 * T62)
+          mul   s1, t1, t2              
+                                  # T64 <- (T60 + T63)
+          add   t1, t0, s1              
+                                  # ý
+          li    t0, 0                   
+                                  # ý
+          li    t2, 18                  
+                                  # T67 <- (T65 * T66)
+          mul   s1, t0, t2              
+                                  # T68 <- (T64 + T67)
+          add   t0, t1, s1              
+                                  # ý
+          li    t1, 0                   
+                                  # ý
+          li    t2, 3                   
+                                  # T71 <- (T69 * T70)
+          mul   s1, t1, t2              
+                                  # T72 <- (T68 + T71)
+          add   t1, t0, s1              
+                                  # ý
+          li    t0, 4                   
+                                  # T74 <- (T72 * T73)
+          mul   t2, t1, t0              
+                                  # T75 <- LOAD_SYMBOL dp
+          la    t0, dp                  
+                                  # T76 <- (T75 + T74)
+          add   t1, t0, t2              
+                                  # T77 <- LOAD T76, 0
+          lw    t0, 0(t1)               
+          mv    a0, t0                  
+          mv    sp, fp                  
+          lw    ra, -4(fp)              
+          lw    fp, -8(fp)              
+          ret                           

@@ -100,8 +100,8 @@ void scan_end();
 %nterm<mind::ast::Statement*> Stmt  ReturnStmt ExprStmt IfStmt  CompStmt WhileStmt DeclStmt DeclStmt_tuo DeclStmt2 DoWhileStmt ForStmt
 %nterm<mind::ast::Expr*> Expr LvalueExpr FExpr
 %nterm<mind::ast::VarRef*> VarRef
-%nterm<mind::ast::ExprList*> ExprList
-%nterm<mind::ast::DimList*> IndexExpr3 IndexExpr1
+%nterm<mind::ast::ExprList*> ExprList IndexExpr1
+%nterm<mind::ast::DimList*> IndexExpr3 
 %nterm<mind::ast::IndexExpr*> IndexExpr2
 %nterm<mind::ast::InitVal*> InitVal InitVals
 /*   SUBSECTION 2.2: associativeness & precedences */
@@ -239,15 +239,15 @@ IndexExpr3   : LBRACK ICONST RBRACK IndexExpr3
 
 
 IndexExpr1   : /* EMPTY */
-                {$$ = new ast::DimList();} 
-            | COMMA ICONST IndexExpr1
+                {$$ = new ast::ExprList();} 
+            | COMMA Expr IndexExpr1
                 { $$ = $3;
                   $$->append_my($2);
                 }
             | COMMA IndexExpr1
                 { $$ = $2;
                 }
-            | ICONST IndexExpr1
+            | Expr IndexExpr1
                 { $$ = $2;
                   $$->append_my($1);
                 }
@@ -258,8 +258,8 @@ IndexExpr1   : /* EMPTY */
                 }
             | LBRACE RBRACE
                 { 
-                  $$ = new ast::DimList();
-                  $$->append_my(0);
+                  $$ = new ast::ExprList();
+                  $$->append_my(new ast::IntConst(0, POS(@1)));
                 }
             ;
 

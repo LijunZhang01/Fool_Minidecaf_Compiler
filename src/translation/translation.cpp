@@ -648,59 +648,26 @@ void Translation::visit(ast::CallExpr *e) {
 void Translation::visit(ast::IndexExpr *e){
     
     if(e->ATTR(dim)!=NULL){
-        // mind_assert(e->expr_list->length() == e->ATTR(dim)->length());
         auto expr = e->expr_list->begin();
         auto dim = e->ATTR(dim)->begin();
-
-        auto dim1 = e->ATTR(dim)->rbegin();
-        auto lian_di=new ast::DimList();
-        int old;
-        for(int i = 1; i < e->ATTR(dim)->length();--dim1, ++i){
-            
-            if(i==1){
-                old=(*dim1);
-                lian_di->append_my(old);
-                continue;
-            }
-            lian_di->append_my((*dim1)*old);
-            old=(*dim1);
-        }
-
-
-        auto dim2 = lian_di->begin();
-        auto expr1 = e->expr_list->rbegin();
-         (*expr1)->accept(this);
-        // std::cout<<(*expr)->ATTR(value);
-        Temp temp = (*expr1)->ATTR(val); 
-        for(int i = 1; i < e->expr_list->length(); ++expr, ++dim2, ++i){
+        dim++;
+        (*expr)->accept(this);
+        Temp temp = (*expr)->ATTR(val); ++expr;
+        for(int i = 1; i < e->expr_list->length(); ++expr, ++dim, ++i){
             (*expr)->accept(this);
-            Temp t = tr->genLoadImm4(*dim2);
-            Temp temp1 = tr->genMul((*expr)->ATTR(val), t);
-            temp = tr->genAdd(temp, temp1);
+            // std::cout<<(*dim)<<" ";
+            // std::cout<<(*expr)->ATTR(value)<<" ";
+            Temp t = tr->genLoadImm4(*dim);
+            temp = tr->genMul(temp, t);
+            temp = tr->genAdd(temp, (*expr)->ATTR(val));
         }
         Temp t = tr->genLoadImm4(4);
         temp = tr->genMul(temp, t);
         e->ATTR(val) = temp;
-
-
-        // (*expr)->accept(this);
-        // Temp temp = (*expr)->ATTR(val); ++expr;
-        // for(int i = 1; i < e->expr_list->length(); ++expr, ++dim,++dim1, ++i){
-        //     (*expr)->accept(this);
-            
-        //     Temp t = tr->genLoadImm4(*dim);
-        //     temp = tr->genMul(temp, t);
-        //     temp = tr->genAdd(temp, (*expr)->ATTR(val));
-        // }
-        // Temp t = tr->genLoadImm4(4);
-        // temp = tr->genMul(temp, t);
-        // e->ATTR(val) = temp;
     }
     else{
         
         auto expr = e->expr_list->begin();
-        
-        
         (*expr)->accept(this);
         Temp temp = (*expr)->ATTR(val); ++expr;
         Temp t = tr->genLoadImm4(4);
@@ -783,9 +750,10 @@ void Translation::visit(ast::VarDecl *decl) {
         if(decl->type->ATTR(type)->isArrayType()){
             
             decl->ATTR(sym)->attachTemp(tr->allocNewTempI4(decl->type->ATTR(type)->getSize()));
-            if(decl->rdim!=NULL){
+            if(decl->rrdim!=NULL){
                 int a=0;
-                for(auto it=decl->rdim->begin();it!=decl->rdim->end();it++){
+                for(auto it=decl->rrdim->begin();it!=decl->rrdim->end();it++){
+                    // (*it)->accept(this);
                     Temp temp=tr->genLoadImm4((*it));
                     tr->genStore(temp, decl->ATTR(sym)->getTemp(), a);
                     a+=4;

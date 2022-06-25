@@ -25,6 +25,8 @@
 #include "list"
 #include <map>
 #include "define.hpp"
+
+#include <string> 
 // #include "define.hpp"
 
 using namespace mind;
@@ -37,6 +39,7 @@ std::map<std::string,int> conv;
 std::list <mind::symb::Function *> mind::aa;
 bool con_b=false;
 int mind::han=1;
+auto b=new ast::DimList();
 // mind::util::List<mind::symb::Function *> aa=*(new std::list<mind::symb::Function *>());
 /* Pass 1 of the semantic analysis.
  */
@@ -262,7 +265,14 @@ void SemPass1::visit(ast::VarDecl *vdecl) {
     Type *t = NULL;
 
     vdecl->type->accept(this);
-    
+    if(vdecl->rdim!=NULL){
+        vdecl->rrdim=new ast::DimList();
+        for(auto it=vdecl->rdim->begin();it!=vdecl->rdim->end();it++){
+            (*it)->accept(this);
+            // std::cout<<(*it)->ATTR(con_v)<<" ";
+            vdecl->rrdim->append((*it)->ATTR(con_v));
+        }
+    }
     
     if(vdecl->ldim!=NULL){
         con_b=true;
@@ -312,20 +322,35 @@ void SemPass1::visit(ast::VarDecl *vdecl) {
     std::int16_t con=vdecl->const1;
     Variable *v;
     if(vdecl->ldim==NULL){
-        v=new Variable(vdecl->name, t,NULL,vdecl->rdim,con,vdecl->getLocation());
+        v=new Variable(vdecl->name, t,NULL,vdecl->rrdim,con,vdecl->getLocation());
     }
     
     else{
-        v=new Variable(vdecl->name, t, vdecl->ldim->ATTR(dim1),vdecl->rdim,con,vdecl->getLocation());
+        v=new Variable(vdecl->name, t, vdecl->ldim->ATTR(dim1),vdecl->rrdim,con,vdecl->getLocation());
     }
     // Variable *v=new Variable(vdecl->name, t, vdecl->ldim->ATTR(dim1),vdecl->rdim,con,vdecl->getLocation());
     if(con){
-        if(vdecl->init!=NULL){
-            con_b=true;
-            vdecl->init->accept(this);
-            conv[vdecl->name]=vdecl->init->ATTR(con_v);
+        if(vdecl->rdim==NULL){
+            if(vdecl->init!=NULL){
+                con_b=true;
+                vdecl->init->accept(this);
+                conv[vdecl->name]=vdecl->init->ATTR(con_v);
+            }
+            con_b=false;
         }
-        con_b=false;
+        else{
+            int t=1;
+            for(auto it=vdecl->rrdim->begin();it!=vdecl->rrdim->end();it++){
+                conv[vdecl->name+std::to_string(t)]=(*it);
+                t++;
+            }
+
+            while(t<(((ArrayType *)(vdecl->type->ATTR(type)))->getLength())){
+                conv[vdecl->name+std::to_string(t)]=0;
+                t++;
+            }
+        }
+        
     }
     if(vdecl->can){
         // ast::DimList *a=new ast::DimList();
@@ -373,8 +398,7 @@ void SemPass1::visit(ast::IndexExpr *e) {
     e->ATTR(dim1)=new ast::DimList();
     for(auto c : *(e->expr_list)){
         c->accept(this);
-        e->ATTR(dim1)->append(c->ATTR(con_v));
-        
+        e->ATTR(dim1)->append(c->ATTR(con_v)); 
     }
         
 }
@@ -415,13 +439,21 @@ void SemPass1::visit(ast::MulExpr *e) {
 
 
 void SemPass1::visit(ast::LvalueExpr *e){
-    if(con_b){
-        std::string temp=((ast::VarRef *)e->lvalue)->var;
-        e->ATTR(con_v)=conv[temp];
+    if(e->lvalue->ATTR(lv_kind)==0){
+        if(con_b){
+            std::string temp=((ast::VarRef *)e->lvalue)->var;
+            e->ATTR(con_v)=conv[temp];
+        }
+    }
+    else{
+        if(con_b){
+            std::string temp=((ast::VarRef *)e->lvalue)->var;
+            e->ATTR(con_v)=conv[temp];
+        }
     }
     
+    
 }
-
 
 void SemPass1::visit(ast::NegExpr *e) {
     e->e->accept(this);
