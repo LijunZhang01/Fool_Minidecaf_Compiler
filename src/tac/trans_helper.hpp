@@ -75,6 +75,7 @@ class TransHelper {
     void genReturn(Temp);
     // Miscellaneous
     void genAssign(Temp, Temp);
+    void genAssigni(Temp, int);
     Temp genLoadImm4(int);
     void genMarkLabel(Label);
     void genMemo(const char *);

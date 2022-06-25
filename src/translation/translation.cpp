@@ -138,6 +138,7 @@ void Translation::visit(ast::AssignExpr *s) {
         }
         else{
             Temp temp = ((ast::VarRef *)(s->left))->ATTR(sym)->getTemp();
+            // tr->genAssigni(temp,s->e->ATTR(value));
             tr->genAssign(temp, s->e->ATTR(val)); 
             s->ATTR(val) = temp;
         }
@@ -186,12 +187,14 @@ void Translation::visit(ast::IfExpr *s) {
     //正确分支代码
     s->true_brch->accept(this);
     //多加一步
+    // tr->genAssigni(temp, s->true_brch->ATTR(value));
     tr->genAssign(temp, s->true_brch->ATTR(val));
     //jump跳到出口
     tr->genJump(L2); // done
     //genMarkLable:标记错误分支地址
     tr->genMarkLabel(L1);
     s->false_brch->accept(this);
+    // tr->genAssigni(temp, s->false_brch->ATTR(value));
     tr->genAssign(temp, s->false_brch->ATTR(val));
     tr->genMarkLabel(L2);
     s->ATTR(val)=temp;
@@ -267,6 +270,7 @@ void Translation::visit(ast::ForStmt *s) {
     }
     else{
         Temp temp = tr->getNewTempI4();
+        // tr->genAssigni(temp, 1);
         tr->genAssign(temp, tr->genLoadImm4(1));
         tr->genJumpOnZero(L2, temp);
     }
@@ -415,6 +419,7 @@ void Translation::visit(ast::AndExpr *e) {
     //e->ATTR(val)= tr->genLAnd(e->e1->ATTR(val), e->e2->ATTR(val));
     tr->genJump(L2);
     tr->genMarkLabel(L1);
+    // tr->genAssigni(temp, 0);
     tr->genAssign(temp, tr->genLoadImm4(0));
     
     //e->ATTR(val)= tr->genLoadImm4(0);
@@ -432,6 +437,7 @@ void Translation::visit(ast::OrExpr *e) {
     e->e1->accept(this);
     tr->genJumpOnZero(L1,e->e1->ATTR(val));
     tr->genAssign(temp, tr->genLoadImm4(1));
+    // tr->genAssigni(temp, 1);
     
     //e->ATTR(val)= tr->genLoadImm4(1);
     tr->genJump(L2);
@@ -768,6 +774,7 @@ void Translation::visit(ast::VarDecl *decl) {
                 decl->init->accept(this);
                 decl->ATTR(sym)->value_v=decl->init->ATTR(value);
                 tr->genAssign(decl->ATTR(sym)->getTemp(),decl->init->ATTR(val));
+                // tr->genAssigni(decl->ATTR(sym)->getTemp(),decl->init->ATTR(value));
             }
         }
         

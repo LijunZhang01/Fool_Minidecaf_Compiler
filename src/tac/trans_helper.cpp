@@ -483,7 +483,9 @@ void TransHelper::genReturn(Temp value) { chainUp(Tac::Return(value)); }
 void TransHelper::genAssign(Temp dest, Temp src) {
     chainUp(Tac::Assign(dest, src));
 }
-
+void TransHelper::genAssigni(Temp dest, int src) {
+    chainUp(Tac::LoadImm4(dest, src));
+}
 /* Appends a LoadImm4 tac node to the current list.
  *
  * PARAMETERS:

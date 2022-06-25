@@ -1108,27 +1108,27 @@ int RiscvDesc::lookupReg(tac::Temp v) {
  *   number of the selected register
  */
 int RiscvDesc::selectRegToSpill(int avoid1, int avoid2, LiveSet *live) {
-    // looks for a "ready" one
+    //先看看有没有和平的方式
     for (int i = 0; i < RiscvReg::TOTAL_NUM; ++i) {
+        //遇到general寄存器跳过，函数参数用
         if (!_reg[i]->general)
             continue;
-
+        //如果不是要避开的1和2，并且这个寄存器现在分配的变量活跃性已经没有了，那么就可以返回这个作为要分配的。
         if ((i != avoid1) && (i != avoid2) && !live->contains(_reg[i]->var))
             return i;
     }
+    //没有能够分配的方式，我们采用将一个寄存器dirty，然后继续分配，冻肉肱骨头
 
-    // looks for a clean one (so that we could save a "store")
     for (int i = 0; i < RiscvReg::TOTAL_NUM; ++i) {
+        //遇到general寄存器跳过，函数参数用
         if (!_reg[i]->general)
             continue;
-
+        //如果不是要避开的1和2，并且这个寄存器不是dirty的，dirty说明这个寄存器已经不能分配了，返回即可
         if ((i != avoid1) && (i != avoid2) && !_reg[i]->dirty)
             return i;
     }
 
-    // the worst case: all are live and all are dirty.
-    // chooses one register w.r.t a policy similar to the LRU algorithm (random
-    // choice)
+    //最坏的情况，全是dirty，没有活跃的，找最远活跃的寄存器
     do {
         _lastUsedReg = (_lastUsedReg + 1) % RiscvReg::TOTAL_NUM;
     } while ((_lastUsedReg == avoid1) || (_lastUsedReg == avoid2) ||
