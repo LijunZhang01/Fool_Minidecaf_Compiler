@@ -37,7 +37,10 @@ extern std::list<mind::tac::Tac> canlian ;
 // extern std::list<mind::symb::Function> aa ;
 extern std::list<mind::symb::Function *> aa;
 extern int han;
-
+extern bool ctrl_sidaima;
+extern bool ctrl_kongzhiliu;
+extern bool ctrl_changliang;
+extern bool ctrl_jicunqi;
 /* Output Functions */
 std::ostream &operator<<(std::ostream &, Location *);
 std::ostream &operator<<(std::ostream &, ast::ASTNode *);

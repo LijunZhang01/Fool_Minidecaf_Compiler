@@ -28,6 +28,13 @@ using namespace mind;
 #define EMPTY_STR std::string()
 #define WORD_SIZE 4
 
+//额滴优化，累死个人
+bool mind::ctrl_sidaima=true;
+bool mind::ctrl_kongzhiliu=true;
+bool mind::ctrl_changliang=true;
+bool mind::ctrl_jicunqi=true;
+
+
 std::list<Tac> mind::canlian;
 /* Constructor of RiscvReg.
  *
@@ -668,8 +675,10 @@ void RiscvDesc::emitFuncty(Functy f) {
     mind_assert(NULL != f);
 
     _frame = new RiscvStackFrameManager(-3 * WORD_SIZE);
+    
     FlowGraph *g = FlowGraph::makeGraph(f);
-    g->simplify();        // simple optimization
+    int m=5;
+    while(ctrl_kongzhiliu&&m--) g->simplify();        // simple optimization
     g->analyzeLiveness(); // computes LiveOut set of the basic blocks
 
     for (FlowGraph::iterator it = g->begin(); it != g->end(); ++it) {
@@ -960,6 +969,8 @@ void RiscvDesc::simplePeephole(RiscvInstr *iseq) {
  * RETURNS:
  *   number of the register containing the content of v
  */
+
+//寄存器分配针对的是基本块内部
 int RiscvDesc::getRegForRead(Temp v, int avoid1, LiveSet *live) {
     std::ostringstream oss;
     
@@ -1005,6 +1016,8 @@ int RiscvDesc::getRegForRead(Temp v, int avoid1, LiveSet *live) {
  * RETURNS:
  *   number of the register which can be safely written to
  */
+//第一个参数，待分配的变量，第二个参数，我不想要那个，第三个参数，我不想要哪个，不想要的真多
+//第四个参数，
 int RiscvDesc::getRegForWrite(Temp v, int avoid1, int avoid2, LiveSet *live) {
     if (NULL == v || !live->contains(v))
         return RiscvReg::ZERO;
@@ -1064,7 +1077,7 @@ void RiscvDesc::spillReg(int i, LiveSet *live) {
  */
 void RiscvDesc::spillDirtyRegs(LiveSet *live) {
     int i;
-    // determines whether we should spill the registers
+    // 先从前往后遍历看是否有dirty寄存器并且还是活跃的，如果有，立即停止，然后进行spill
     for (i = 0; i < RiscvReg::TOTAL_NUM; ++i) {
         if ((NULL != _reg[i]->var) && _reg[i]->dirty &&
             live->contains(_reg[i]->var))
@@ -1074,6 +1087,7 @@ void RiscvDesc::spillDirtyRegs(LiveSet *live) {
         _reg[i]->dirty = false;
     }
 
+    //执行这一步代表有要spill的，所以我们进行遍历，利用spillreg处理
     if (i < RiscvReg::TOTAL_NUM) {
         addInstr(RiscvInstr::COMMENT, NULL, NULL, NULL, 0, EMPTY_STR,
                  "(save modified registers before control flow changes)");
@@ -1123,7 +1137,7 @@ int RiscvDesc::selectRegToSpill(int avoid1, int avoid2, LiveSet *live) {
         //遇到general寄存器跳过，函数参数用
         if (!_reg[i]->general)
             continue;
-        //如果不是要避开的1和2，并且这个寄存器不是dirty的，dirty说明这个寄存器已经不能分配了，返回即可
+        //如果不是要避开的1和2，并且这个寄存器不是dirty的，返回即可
         if ((i != avoid1) && (i != avoid2) && !_reg[i]->dirty)
             return i;
     }
