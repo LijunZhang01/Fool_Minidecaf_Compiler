@@ -41,6 +41,7 @@ extern bool ctrl_sidaima;
 extern bool ctrl_kongzhiliu;
 extern bool ctrl_changliang;
 extern bool ctrl_jicunqi;
+extern bool ctrl_qiangduxueruo;
 /* Output Functions */
 std::ostream &operator<<(std::ostream &, Location *);
 std::ostream &operator<<(std::ostream &, ast::ASTNode *);

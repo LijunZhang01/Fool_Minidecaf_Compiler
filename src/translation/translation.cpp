@@ -126,7 +126,10 @@ void Translation::visit(ast::AssignExpr *s) {
     if(ref->ATTR(sym)->isGlobalVar()){
         Temp temp = tr->genLoadSymbol(ref->var);
         if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAY_ELE)
+        {
             temp = tr->genAdd(temp, ref->ldim->ATTR(val));
+        }
+
         tr->genStore(s->e->ATTR(val), temp, 0);
         s->ATTR(val) = s->e->ATTR(val);
     }
@@ -145,6 +148,7 @@ void Translation::visit(ast::AssignExpr *s) {
         
     }
     s->ATTR(value) = s->e->ATTR(value);
+
     ref->ATTR(sym)->value_v=s->e->ATTR(value);
 }
 
@@ -316,7 +320,13 @@ void Translation::visit(ast::AddExpr *e) {
     e->e1->accept(this);
     e->e2->accept(this);
 
-    e->ATTR(val) = tr->genAdd(e->e1->ATTR(val), e->e2->ATTR(val));
+    // if(mind::ctrl_qiangduxueruo){
+    //     if(e->e1->ATTR(value)==0) e->ATTR(val)=e->e2->ATTR(val);
+    //     else if(e->e2->ATTR(value)==0) e->ATTR(val)=e->e1->ATTR(val);
+    //     else e->ATTR(val) = tr->genAdd(e->e1->ATTR(val), e->e2->ATTR(val));
+    // }
+    // else 
+        e->ATTR(val) = tr->genAdd(e->e1->ATTR(val), e->e2->ATTR(val));
     e->ATTR(value)=e->e1->ATTR(value)+e->e2->ATTR(value);
 }
 
@@ -337,7 +347,15 @@ void Translation::visit(ast::MulExpr *e) {
     e->e1->accept(this);
     e->e2->accept(this);
 
-    e->ATTR(val) = tr->genMul(e->e1->ATTR(val), e->e2->ATTR(val));
+
+    // if(mind::ctrl_qiangduxueruo){
+    //     if(e->e1->ATTR(value)==1) e->ATTR(val)=e->e2->ATTR(val);
+    //     else if(e->e2->ATTR(value)==1) e->ATTR(val)=e->e1->ATTR(val);
+    //     else e->ATTR(val) = tr->genMul(e->e1->ATTR(val), e->e2->ATTR(val));
+    // }
+    // else 
+        e->ATTR(val) = tr->genMul(e->e1->ATTR(val), e->e2->ATTR(val));
+    //e->ATTR(val) = tr->genMul(e->e1->ATTR(val), e->e2->ATTR(val));
     e->ATTR(value)=e->e1->ATTR(value)*e->e2->ATTR(value);
 }
 
@@ -537,19 +555,12 @@ void Translation::visit(ast::LvalueExpr *e) {
         case ast::ASTNode::VAR_REF:{
             ast::VarRef *ref = (ast::VarRef *)e->lvalue;
             if(ref->ATTR(sym)->isGlobalVar()){
-                // if(ref->ATTR(sym)->iscon){
-                //     e->ATTR(val) = tr->genLoadImm4(ref->ATTR(sym)->value_v);
-                // }
-                // else{
-                    // Temp temp = tr->genLoadSymbol(ref->ATTR(sym)->getName());
-                    // if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAY_ELE)
-                    // temp = tr->genAdd(temp, ref->ldim->ATTR(val));
-                    // e->ATTR(val) = tr->genLoad(temp, 0);
 
 
                     Temp temp = tr->genLoadSymbol(ref->ATTR(sym)->getName());
                     if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAY_ELE){
                         temp = tr->genAdd(temp, ref->ldim->ATTR(val));
+                        //temp = tr->genAdd(temp, ref->ldim->ATTR(val));
                         e->ATTR(val) = tr->genLoad(temp, 0);
                     }
                     else{
@@ -562,36 +573,7 @@ void Translation::visit(ast::LvalueExpr *e) {
                     }
                        
 
-                    // if(ref->ATTR(type)->isArrayType())
-                    // {
-                    //     if(ref->ldim==NULL){
-                    //         e->ATTR(val) = temp;
-                    //     }
-                    //     else{
-                    //         temp = tr->genAdd(temp, ref->ldim->ATTR(val));
-                    //         e->ATTR(val) = tr->genLoad(temp, 0);
-                    //     }
-                    // }
-                    // else{
-                    //     // temp = tr->genAdd(temp, ref->ldim->ATTR(val));
-                    //     e->ATTR(val) = tr->genLoad(temp, 0);
-                    // }
-                
-                // if(ref->ATTR(sym)->iscon){
-                //     e->ATTR(value) = ref->ATTR(sym)->con_val;
-                // }
-                // else{
-                //     scope::Scope *scop_temp=ref->ATTR(sym)->getScope();
-                //     int jiji=0;
-                //     for(auto item=scop_temp->begin();item!=scop_temp->end();item++){
-                //         if((*item)->getName()==ref->var)
-                //         {
-                //             e->ATTR(value)=(dynamic_cast<mind::symb::Variable *>(*item))->getGlobalInit();
-                //             jiji=1;
-                //         }
-                //     }
-                //     if(jiji==0) mind_assert(false);
-                // }
+                    
             }
             else {
                 if(ref->ATTR(sym)->iscon){
@@ -599,7 +581,9 @@ void Translation::visit(ast::LvalueExpr *e) {
                 }
                 else{
                     if(ref->ATTR(lv_kind) == ast::Lvalue::ARRAY_ELE){
-                        Temp temp = tr->genAdd(ref->ATTR(sym)->getTemp(), ref->ldim->ATTR(val));
+                        Temp temp;
+                        temp = tr->genAdd(ref->ATTR(sym)->getTemp(), ref->ldim->ATTR(val));
+                        //Temp temp = tr->genAdd(ref->ATTR(sym)->getTemp(), ref->ldim->ATTR(val));
                         e->ATTR(val) = tr->genLoad(temp, 0);
                     }
                     else 
@@ -669,7 +653,13 @@ void Translation::visit(ast::IndexExpr *e){
             // std::cout<<(*expr)->ATTR(value)<<" ";
             Temp t = tr->genLoadImm4(*dim);
             temp = tr->genMul(temp, t);
-            temp = tr->genAdd(temp, (*expr)->ATTR(val));
+            // if(mind::ctrl_qiangduxueruo){
+            //     if((*expr)->ATTR(value)==0) temp=temp;
+            //     else temp = tr->genAdd(temp, (*expr)->ATTR(val));
+            // }
+            // else 
+                temp = tr->genAdd(temp, (*expr)->ATTR(val));
+            //temp = tr->genAdd(temp, (*expr)->ATTR(val));
         }
         Temp t = tr->genLoadImm4(4);
         temp = tr->genMul(temp, t);

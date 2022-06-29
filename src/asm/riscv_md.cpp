@@ -30,10 +30,10 @@ using namespace mind;
 
 //额滴优化，累死个人
 bool mind::ctrl_sidaima=true;
-bool mind::ctrl_kongzhiliu=true;
+bool mind::ctrl_kongzhiliu=false;
 bool mind::ctrl_changliang=true;
 bool mind::ctrl_jicunqi=true;
-
+bool mind::ctrl_qiangduxueruo=false;
 
 std::list<Tac> mind::canlian;
 /* Constructor of RiscvReg.
@@ -347,6 +347,7 @@ void RiscvDesc::emitTac(Tac *t) {
         break;
 
     case Tac::MUL:
+        
         emitBinaryTac(RiscvInstr::MUL, t);
         break;
 
@@ -696,20 +697,20 @@ void RiscvDesc::emitFuncty(Functy f) {
         _frame->reset();
         // translates the TAC sequences of this block
         b->instr_chain = prepareSingleChain(b, g);
-        if (Option::doOptimize()) // use "-O" option to enable optimization
-            simplePeephole((RiscvInstr *)b->instr_chain);
+        
+        //simplePeephole((RiscvInstr *)b->instr_chain);
         b->mark = 0; // clears the marks (for the next step)
     }
-    if (Option::getLevel() == Option::DATAFLOW) {
-        std::cout << "Control-flow Graph of " << f->entry << ":" << std::endl;
-        g->dump(std::cout);
-        // TO STUDENTS: You might not want to get lots of outputs when
-        // debugging.
-        //              You can enable the following line so that the program
-        //              will terminate after the first Functy is done.
-        // std::exit(0);
-        return;
-    }
+    // if (Option::getLevel() == Option::DATAFLOW) {
+    //     std::cout << "Control-flow Graph of " << f->entry << ":" << std::endl;
+    //     g->dump(std::cout);
+    //     // TO STUDENTS: You might not want to get lots of outputs when
+    //     // debugging.
+    //     //              You can enable the following line so that the program
+    //     //              will terminate after the first Functy is done.
+    //     // std::exit(0);
+    //     return;
+    // }
 
     mind_assert(!f->entry->str_form.empty()); // this assertion should hold for every Functy
     // outputs the header of a function
@@ -1122,31 +1123,57 @@ int RiscvDesc::lookupReg(tac::Temp v) {
  *   number of the selected register
  */
 int RiscvDesc::selectRegToSpill(int avoid1, int avoid2, LiveSet *live) {
-    //先看看有没有和平的方式
-    for (int i = 0; i < RiscvReg::TOTAL_NUM; ++i) {
-        //遇到general寄存器跳过，函数参数用
-        if (!_reg[i]->general)
-            continue;
-        //如果不是要避开的1和2，并且这个寄存器现在分配的变量活跃性已经没有了，那么就可以返回这个作为要分配的。
-        if ((i != avoid1) && (i != avoid2) && !live->contains(_reg[i]->var))
-            return i;
+    if(ctrl_jicunqi){
+        //先看看有没有和平的方式
+        for (int i = 0; i < RiscvReg::TOTAL_NUM; ++i) {
+            //遇到general寄存器跳过，函数参数用
+            if (!_reg[i]->general)
+                continue;
+            //如果不是要避开的1和2，并且这个寄存器现在分配的变量活跃性已经没有了，那么就可以返回这个作为要分配的。
+            if ((i != avoid1) && (i != avoid2) && !live->contains(_reg[i]->var))
+                return i;
+        }
+        //没有能够分配的方式，我们采用将一个寄存器dirty，然后继续分配，冻肉肱骨头
+
+        for (int i = 0; i < RiscvReg::TOTAL_NUM; ++i) {
+            //遇到general寄存器跳过，函数参数用
+            if (!_reg[i]->general)
+                continue;
+            //如果不是要避开的1和2，并且这个寄存器不是dirty的，返回即可
+            if ((i != avoid1) && (i != avoid2) && !_reg[i]->dirty)
+                return i;
+        }
+
+        //最坏的情况，全是dirty，没有活跃的，找最远活跃的寄存器
+        do {
+            _lastUsedReg = (_lastUsedReg + 1) % RiscvReg::TOTAL_NUM;
+        } while ((_lastUsedReg == avoid1) || (_lastUsedReg == avoid2) ||
+                !_reg[_lastUsedReg]->general);
+
+        return _lastUsedReg;
     }
-    //没有能够分配的方式，我们采用将一个寄存器dirty，然后继续分配，冻肉肱骨头
-
-    for (int i = 0; i < RiscvReg::TOTAL_NUM; ++i) {
-        //遇到general寄存器跳过，函数参数用
-        if (!_reg[i]->general)
-            continue;
-        //如果不是要避开的1和2，并且这个寄存器不是dirty的，返回即可
-        if ((i != avoid1) && (i != avoid2) && !_reg[i]->dirty)
-            return i;
+    else{
+        for (int i = 0; i < RiscvReg::TOTAL_NUM; ++i) {
+            //遇到general寄存器跳过，函数参数用
+            if (!_reg[i]->general)
+                continue;
+            //如果不是要避开的1和2，并且这个寄存器现在分配的变量活跃性已经没有了，那么就可以返回这个作为要分配的。
+            if ((i != avoid1) && (i != avoid2) && !live->contains(_reg[i]->var))
+                return i;
+        }
+        for (int i = 0; i < RiscvReg::TOTAL_NUM; ++i) {
+            //遇到general寄存器跳过，函数参数用
+            if (!_reg[i]->general)
+                continue;
+            //如果不是要避开的1和2，并且这个寄存器不是dirty的，返回即可
+            if ((i != avoid1) && (i != avoid2) && !_reg[i]->dirty)
+                return i;
+        }
+        srand((unsigned)time(NULL));
+        int j=0; 
+        do {
+            j=rand()%RiscvReg::TOTAL_NUM;
+        } while ((j == avoid1) || (j == avoid2) ||!_reg[j]->general);
+        return j;
     }
-
-    //最坏的情况，全是dirty，没有活跃的，找最远活跃的寄存器
-    do {
-        _lastUsedReg = (_lastUsedReg + 1) % RiscvReg::TOTAL_NUM;
-    } while ((_lastUsedReg == avoid1) || (_lastUsedReg == avoid2) ||
-             !_reg[_lastUsedReg]->general);
-
-    return _lastUsedReg;
 }
