@@ -357,6 +357,7 @@ void SemPass1::visit(ast::VarDecl *vdecl) {
         
         v=new Variable(vdecl->name, t, NULL,NULL,con,vdecl->getLocation());
     }
+    
     vdecl->ATTR(sym) = v;
     Symbol *sym = scopes->lookup(vdecl->name, vdecl->getLocation(), 0);
     if(sym != NULL)

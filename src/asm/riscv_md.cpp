@@ -18,7 +18,8 @@
 #include <cstring>
 #include <iomanip>
 #include <sstream>
-
+#include<set>
+#include<map>
 using namespace mind::assembly;
 using namespace mind::tac;
 using namespace mind::util;
@@ -28,13 +29,34 @@ using namespace mind;
 #define EMPTY_STR std::string()
 #define WORD_SIZE 4
 
-//额滴优化，累死个人
+std::set<Temp> nodes;
+std::map<Temp, std::set<Temp>> neighbours;
+std::map<Temp, int> nodeDeg;
+int regs[18]={RiscvReg::T0,
+              RiscvReg::T1,
+              RiscvReg::T2,
+              RiscvReg::T3,
+              RiscvReg::T4,
+              RiscvReg::T5,
+              RiscvReg::T6,
+              RiscvReg::S1,
+              RiscvReg::S2,
+              RiscvReg::S3,
+              RiscvReg::S4,
+              RiscvReg::S5,
+              RiscvReg::S6,
+              RiscvReg::S7,
+              RiscvReg::S8,
+              RiscvReg::S9,
+              RiscvReg::S10,RiscvReg::S11};
+
+//额滴优化
 bool mind::ctrl_sidaima=true;
-bool mind::ctrl_kongzhiliu=false;
+bool mind::ctrl_kongzhiliu=true;
 bool mind::ctrl_changliang=true;
 bool mind::ctrl_jicunqi=true;
-bool mind::ctrl_qiangduxueruo=false;
-
+bool mind::ctrl_qiangduxueruo=true;
+void alloc(tac::BasicBlock *b);
 std::list<Tac> mind::canlian;
 /* Constructor of RiscvReg.
  *
@@ -202,6 +224,7 @@ void RiscvDesc::emitPieces(scope::GlobalScope *gscope, Piece *ps,
     while (NULL != ps) {
         switch (ps->kind) {
         case Piece::FUNCTY:
+        
             emitFuncty(ps->as.functy);
             break;
 
@@ -694,23 +717,24 @@ void RiscvDesc::emitFuncty(Functy f) {
     for (FlowGraph::iterator it = g->begin(); it != g->end(); ++it) {
         BasicBlock *b = *it;
         b->analyzeLiveness(); // computes LiveOut set of every TAC
+        alloc(b);
         _frame->reset();
         // translates the TAC sequences of this block
         b->instr_chain = prepareSingleChain(b, g);
         
-        //simplePeephole((RiscvInstr *)b->instr_chain);
+        simplePeephole((RiscvInstr *)b->instr_chain);
         b->mark = 0; // clears the marks (for the next step)
     }
-    // if (Option::getLevel() == Option::DATAFLOW) {
-    //     std::cout << "Control-flow Graph of " << f->entry << ":" << std::endl;
-    //     g->dump(std::cout);
-    //     // TO STUDENTS: You might not want to get lots of outputs when
-    //     // debugging.
-    //     //              You can enable the following line so that the program
-    //     //              will terminate after the first Functy is done.
-    //     // std::exit(0);
-    //     return;
-    // }
+    if (Option::getLevel() == Option::DATAFLOW) {
+        std::cout << "Control-flow Graph of " << f->entry << ":" << std::endl;
+        g->dump(std::cout);
+        // TO STUDENTS: You might not want to get lots of outputs when
+        // debugging.
+        //              You can enable the following line so that the program
+        //              will terminate after the first Functy is done.
+        // std::exit(0);
+        return;
+    }
 
     mind_assert(!f->entry->str_form.empty()); // this assertion should hold for every Functy
     // outputs the header of a function
@@ -795,8 +819,18 @@ void RiscvDesc::emitInstr(RiscvInstr *i) {
         break;
 
     case RiscvInstr::MOVE:
-        oss << "mv" << i->r0->name << ", " << i->r1->name;
-        break;
+        if(ctrl_qiangduxueruo){
+            if(strcmp(i->r0->name,i->r1->name)==0) break;
+            else{
+                oss << "mv" << i->r0->name << ", " << i->r1->name;
+                break;
+            }
+        }
+        else{
+            oss << "mv" << i->r0->name << ", " << i->r1->name;
+            break;
+        }
+        
 
     case RiscvInstr::LW:
         oss << "lw" << i->r0->name << ", " << i->i << "(" << i->r1->name << ")";
@@ -811,8 +845,25 @@ void RiscvDesc::emitInstr(RiscvInstr *i) {
         break;
     
     case RiscvInstr::ADD:
-        oss << "add" << i->r0->name << ", " << i->r1->name << ", " << i->r2->name;
-        break;
+        if(ctrl_qiangduxueruo){
+            if(strcmp(i->r1->name,"0")==0){
+                oss << "mv" << i->r0->name << ", " << i->r2->name;
+                break;
+            }
+            else if(strcmp(i->r2->name,"0")==0){
+                oss << "mv" << i->r0->name << ", " << i->r1->name;
+                break;
+            }
+            else{
+                oss << "add" << i->r0->name << ", " << i->r1->name << ", " << i->r2->name;
+                break;
+            }
+        }
+        else{
+            oss << "add" << i->r0->name << ", " << i->r1->name << ", " << i->r2->name;
+            break;
+        }
+        
 
     //step2
     case RiscvInstr::MOD:
@@ -956,7 +1007,13 @@ void RiscvDesc::addInstr(RiscvInstr::OpCode op_code, RiscvReg *r0, RiscvReg *r1,
 void RiscvDesc::simplePeephole(RiscvInstr *iseq) {
     // if you are interested in peephole optimization, you can implement here
     // of course, beyond our requirements
-    
+//    while(iseq){
+//         if(iseq->op_code==RiscvInstr::MOVE){
+//             if(iseq->r0==iseq->r1)
+//                 iseq->
+//         }
+//         iseq=iseq->next;
+//    }
 }
 
 /******************* REGISTER ALLOCATOR ***********************/
@@ -974,37 +1031,70 @@ void RiscvDesc::simplePeephole(RiscvInstr *iseq) {
 //寄存器分配针对的是基本块内部
 int RiscvDesc::getRegForRead(Temp v, int avoid1, LiveSet *live) {
     std::ostringstream oss;
-    
-    int i = lookupReg(v);
+    if(ctrl_jicunqi){
+        if(v->reg!=-1&&_reg[v->reg]->var == v){
+            // _reg[v->reg]->var = v;
+            _reg[v->reg]->var=v;
+            return v->reg;
+        }
+        else{
+            // std::cout<<"2222";
+            int i;
 
-    if (i < 0) {
-        // we will load the content into some register
-        i = lookupReg(NULL);
+            i = RiscvReg::A5;
+            if(i==avoid1){
+                i=RiscvReg::A6;
+            }
+            if (v->is_offset_fixed) {
+                RiscvReg *base = _reg[RiscvReg::FP];
+                oss << "load " << v << " from (" << base->name
+                    << (v->offset < 0 ? "" : "+") << v->offset << ") into "
+                    << _reg[i]->name;
+                addInstr(RiscvInstr::LW, _reg[i], base, NULL, v->offset, EMPTY_STR,
+                        oss.str().c_str());
+
+            } else {
+                oss << "initialize " << v << " with 0";
+                addInstr(RiscvInstr::MOVE, _reg[i], _reg[RiscvReg::ZERO], NULL, 0,
+                        EMPTY_STR, oss.str().c_str());
+            }
+            _reg[i]->dirty = false;
+            return i;
+        }
+    }
+    else{
+        int i = lookupReg(v);
 
         if (i < 0) {
-            i = selectRegToSpill(avoid1, RiscvReg::ZERO, live);
-            spillReg(i, live);
+            // we wil load the content into some register
+            i = lookupReg(NULL);
+
+            if (i < 0) {
+                i = selectRegToSpill(avoid1, RiscvReg::ZERO, live);
+                spillReg(i, live);
+            }
+
+            _reg[i]->var = v;
+
+            if (v->is_offset_fixed) {
+                RiscvReg *base = _reg[RiscvReg::FP];
+                oss << "load " << v << " from (" << base->name
+                    << (v->offset < 0 ? "" : "+") << v->offset << ") into "
+                    << _reg[i]->name;
+                addInstr(RiscvInstr::LW, _reg[i], base, NULL, v->offset, EMPTY_STR,
+                        oss.str().c_str());
+
+            } else {
+                oss << "initialize " << v << " with 0";
+                addInstr(RiscvInstr::MOVE, _reg[i], _reg[RiscvReg::ZERO], NULL, 0,
+                        EMPTY_STR, oss.str().c_str());
+            }
+            _reg[i]->dirty = false;
         }
 
-        _reg[i]->var = v;
-
-        if (v->is_offset_fixed) {
-            RiscvReg *base = _reg[RiscvReg::FP];
-            oss << "load " << v << " from (" << base->name
-                << (v->offset < 0 ? "" : "+") << v->offset << ") into "
-                << _reg[i]->name;
-            addInstr(RiscvInstr::LW, _reg[i], base, NULL, v->offset, EMPTY_STR,
-                     oss.str().c_str());
-
-        } else {
-            oss << "initialize " << v << " with 0";
-            addInstr(RiscvInstr::MOVE, _reg[i], _reg[RiscvReg::ZERO], NULL, 0,
-                     EMPTY_STR, oss.str().c_str());
-        }
-        _reg[i]->dirty = false;
+        return i;
     }
-
-    return i;
+    
 }
 
 /* Acquires a register to write some variable.
@@ -1020,24 +1110,46 @@ int RiscvDesc::getRegForRead(Temp v, int avoid1, LiveSet *live) {
 //第一个参数，待分配的变量，第二个参数，我不想要那个，第三个参数，我不想要哪个，不想要的真多
 //第四个参数，
 int RiscvDesc::getRegForWrite(Temp v, int avoid1, int avoid2, LiveSet *live) {
-    if (NULL == v || !live->contains(v))
-        return RiscvReg::ZERO;
+    if(ctrl_jicunqi){
+        if(v->reg!=-1){
+            _reg[v->reg]->var = v;
+            _reg[v->reg]->dirty = true;
+            return v->reg;
+        }
+        else{
+            RiscvReg *base = _reg[RiscvReg::FP];
+            _reg[RiscvReg::A5]->var=v;
+            if (!v->is_offset_fixed) {
+                _frame->getSlotToWrite(v, live);
+            }
+            std::ostringstream oss;
+            addInstr(RiscvInstr::SW, _reg[RiscvReg::A5], base, NULL, v->offset, EMPTY_STR,
+                 oss.str().c_str());
+            // return i;
+            return RiscvReg::A5;
+        }
+    }
+    else{
+        if (NULL == v || !live->contains(v))
+            return RiscvReg::ZERO;
 
-    int i = lookupReg(v);
-
-    if (i < 0) {
-        i = lookupReg(NULL);
+        int i = lookupReg(v);
 
         if (i < 0) {
-            i = selectRegToSpill(avoid1, avoid2, live);
-            spillReg(i, live);
+            i = lookupReg(NULL);
+
+            if (i < 0) {
+                i = selectRegToSpill(avoid1, avoid2, live);
+                spillReg(i, live);
+            }
+            _reg[i]->var = v;
         }
-        _reg[i]->var = v;
+
+        _reg[i]->dirty = true;
+
+        return i;
     }
-
-    _reg[i]->dirty = true;
-
-    return i;
+    
 }
 
 /* Spills a specified register (into memory, i.e. into the stack-frame).
@@ -1176,4 +1288,261 @@ int RiscvDesc::selectRegToSpill(int avoid1, int avoid2, LiveSet *live) {
         } while ((j == avoid1) || (j == avoid2) ||!_reg[j]->general);
         return j;
     }
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+void clear() {
+	nodes.clear();
+	neighbours.clear();
+	nodeDeg.clear();
+}
+
+void removeNode(Temp n) {
+	nodes.erase(n);
+	for (Temp m : neighbours[n])
+		if (nodes.find(m)!=nodes.end())
+			nodeDeg.insert({m, nodeDeg[m] - 1});
+}
+void removeRandeNode(){
+    srand((unsigned)time(NULL));
+    int j=rand()%10;
+    int x=0;
+    Temp n;
+    for(auto i=nodes.begin();i!=nodes.end();i++){
+        if(x==j){
+            n=*i;
+            break;
+        }
+        x++;
+    }
+    if(x>nodes.size()){
+        for(auto i=nodes.begin();i!=nodes.end();i++){
+            n=*i;
+            break;
+        }
+    }
+    n->reg=-1;
+    nodes.erase(n);
+	for (Temp m : neighbours[n])
+		if (nodes.find(m)!=nodes.end())
+			nodeDeg.insert({m, nodeDeg[m] - 1});
+}
+
+int chooseAvailableRegister(Temp n) {
+	std::set<int> usedRegs;
+	for (Temp m : neighbours[n]) {
+		if (m->reg == -1) continue;
+		usedRegs.insert(m->reg);
+	}
+	for (int r : regs)
+		if (!(usedRegs.find(r)!=usedRegs.end()))
+			return r;
+	return -1;
+}
+
+bool color() {
+		if (nodes.empty())
+			return true;
+
+	
+		Temp n = NULL;
+		for (Temp t : nodes) {
+			if (nodeDeg[t] < 18) {
+				n = t;
+				break;
+			}
+		}
+
+		if (n != NULL) {
+			
+			removeNode(n);
+			bool subColor = color();
+			n->reg = chooseAvailableRegister(n);
+			return subColor;
+		} else {
+            removeRandeNode();
+			color();
+            return true;
+		}
+	}
+
+void addNode(Temp node) {
+	if (nodes.find(node)!=nodes.end()) return;
+	//if (node->reg != -1 && node->reg.equals(fp)) return;
+	nodes.insert(node);
+    std::set<Temp> a;
+	neighbours.insert({node,a });
+	nodeDeg.insert({node, 0});
+}
+void addEdge(Temp a, Temp b) {
+		neighbours[a].insert(b);
+		neighbours[b].insert(a);
+		nodeDeg.insert({a, nodeDeg[a] + 1});
+		nodeDeg.insert({b, nodeDeg[b] + 1});
+	}
+
+
+
+
+
+
+
+
+
+void makeNodes(BasicBlock *b) {
+        auto c=b->LiveUse;
+		
+        for(auto i=c->begin();i!=c->end();i++){
+            addNode(*i);
+        }
+        
+		for (auto tac = b->tac_chain; tac != NULL; tac = tac->next) {
+			switch (tac->op_code) {
+				case Tac::ADD: 
+                case Tac::SUB: 
+                case Tac::MUL: 
+                case Tac::DIV: 
+                case Tac::MOD:
+				case Tac::LAND: 
+                case Tac::LOR: 
+                case Tac::GTR: 
+                case Tac::GEQ:
+                case Tac::EQU:
+				case Tac::NEQ: 
+                case Tac::LEQ: 
+                case Tac::LES:
+					addNode(tac->op0.var); addNode(tac->op1.var); addNode(tac->op2.var);
+					break;
+
+				case Tac::NEG: 
+                case Tac::LNOT: 
+                case Tac::ASSIGN:
+                case Tac::BNOT:
+                case Tac::LOAD:
+					addNode(tac->op0.var); addNode(tac->op1.var);
+					break;
+
+
+                case Tac::POP:
+                case Tac::ALLOC:
+                case Tac::LOAD_IMM4:
+                case Tac::LOADSYMBOL:
+                    addNode(tac->op0.var);
+					break;
+
+				case Tac::PUSH:
+                case Tac::PUSH1:
+                case Tac::CALL: 
+					addNode(tac->op0.var);
+					break;
+
+	
+				case Tac::STORE:
+					addNode(tac->op0.var); addNode(tac->op1.var);
+					break;
+
+				default:
+                    mind_assert(false); 
+                                
+                    break;
+			}
+		}
+	}
+
+
+
+	void makeEdges(BasicBlock *bb) {
+
+		// Ensure that all variables in liveUse have different colors.
+		// In fact this is not necessary unless they are loaded at the same time,
+		// just as we are required to do, unfortunately.
+		for (auto a:*(bb->LiveUse)) {
+			for (auto b : *(bb->LiveUse)) {
+				if (a!=b && !(neighbours[a].find(b)!=neighbours[a].end())) {
+					addEdge(a, b);
+				}
+			}
+		}
+
+		for (auto tac = bb->tac_chain; tac != NULL; tac = tac->next) {
+			switch (tac->op_code) {
+				case Tac::ADD:
+				case Tac::SUB:
+				case Tac::MUL:
+				case Tac::DIV:
+				case Tac::MOD:
+				case Tac::LAND:
+				case Tac::LOR:
+				case Tac::GTR:
+				case Tac::GEQ:
+				case Tac::EQU:
+				case Tac::NEQ:
+				case Tac::LEQ:
+				case Tac::LES:
+
+				case Tac::NEG:
+				case Tac::LNOT:
+                case Tac::BNOT:
+				case Tac::ASSIGN:
+                case Tac::LOAD:
+                case Tac::LOAD_IMM4:
+                case Tac::LOADSYMBOL:
+                case Tac::CALL:
+                case Tac::ALLOC:
+					if (tac->op0.var != NULL && tac->LiveOut != NULL) {
+						for (auto out : *tac->LiveOut) {
+							// only consider liveOut inside B
+                        
+							if (!(out==tac->op0.var) && nodes.find(out)!=nodes.end()){
+                                // std::cout<<"1111111111"<<" ";
+								addEdge(tac->op0.var, out);
+							}
+						}
+					}
+					break;
+                case Tac::PUSH:
+                case Tac::PUSH1:
+                
+				case Tac::STORE:
+                case Tac::POP:
+                
+                
+					// use op0
+					break;
+
+				default:
+                    mind_assert(false); 
+                                
+                    break;
+			}
+		}
+	}
+
+void makeGraph(BasicBlock *b) {
+	
+	makeNodes(b);
+	// for(auto i:nodes){
+    //     std::cout<<i<<" ";
+    // }
+	makeEdges(b);
+    // for(auto i:neighbours){
+    //     std::cout<<i.first<<"         ";
+    //     for(auto j:i.second){
+    //         std::cout<<j<<" ";
+    //     }
+    // }
+}
+
+void alloc(BasicBlock *b){
+    do{
+		clear();
+		makeGraph(b);
+	} while (!color());
 }

@@ -149,6 +149,16 @@ class RiscvDesc : public MachineDesc {
     // translates the given "tac::Piece" into RISC-V assembly code
     virtual void emitPieces(scope::GlobalScope *, tac::Piece *,
                             std::ostream &os);
+    // void alloc(tac::BasicBlock *b);
+    // void makeEdges(tac::BasicBlock *bb);
+    // void makeNodes(tac::BasicBlock *b);
+    // int chooseAvailableRegister(tac::Temp n);
+    // void removeNode(tac::Temp n);
+    // void addEdge(tac::Temp a,tac::Temp b);
+    // void addNode(tac::Temp node);
+    // bool color();
+    // void makeGraph(tac::BasicBlock *b);
+    // void clear();
 
   private:
     // where to output the assembly code
@@ -220,6 +230,7 @@ class RiscvDesc : public MachineDesc {
     int lookupReg(tac::Temp);
     // selects a register to spill into memory
     int selectRegToSpill(int, int, LiveSet *);
+    
 };
 
 } // namespace assembly

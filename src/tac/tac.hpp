@@ -33,6 +33,7 @@ typedef struct TempObject {
     int size;             // size of a Temp (e.g. size = 4 for int32)
     bool is_offset_fixed; // whether the Temp has been allocated on the stack
     int offset;           // the offset on the stack (relative to fp, see the example)
+    int reg;
 } * Temp;
 
 

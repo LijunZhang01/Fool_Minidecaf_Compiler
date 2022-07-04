@@ -212,7 +212,7 @@ Stmt        : ReturnStmt {$$ = $1;}|
                 {$$ = new ast::EmptyStmt(POS(@1));}
             ;
 
-DeclStmt    : Type IDENTIFIER DouList SEMICOLON 
+DeclStmt    : Type IDENTIFIER DouList SEMICOLON
                 { $$ = new ast::VarDecl($2, $1, $3,POS(@1)); }
             | Type IDENTIFIER ASSIGN Expr DouList SEMICOLON 
                 { $$ = new ast::VarDecl($2, $1, $4, $5,POS(@1)); }
